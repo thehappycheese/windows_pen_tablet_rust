@@ -1,0 +1,9 @@
+[package]
+name = "winit_and_octotab"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.81"
+octotablet = "0.1.0"
+winit = "0.29.15"

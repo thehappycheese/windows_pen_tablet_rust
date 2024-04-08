@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "windows_direct",
+    "winit_and_octotab",
+    "wintab_test"
+]

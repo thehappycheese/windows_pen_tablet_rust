@@ -1,0 +1,21 @@
+[package]
+name = "wintab"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.81"
+lazy_static = "1.4.0"
+libloading = "0.8.3"
+[dependencies.windows]
+version = "0.54.0"
+features = [
+        "Win32_Graphics_Gdi",
+        "Win32_System_LibraryLoader",
+        "Win32_UI_WindowsAndMessaging",
+        "Win32_UI_Input",
+        "Win32_UI_Input_Pointer"
+]
+
+[build-dependencies]
+bindgen = "0.69.4"
