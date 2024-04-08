@@ -1,5 +1,3 @@
-
-use std::{ptr::addr_of, sync::Once};
 mod wt {
     pub use crate::wintab32_bindings::*;
 }
@@ -16,56 +14,27 @@ use windows::{
 };
 mod wintab32_bindings;
 use anyhow::Result;
-use lazy_static::lazy_static;
 
-// lazy_static! {
-//     // GETPROCADDRESS( WTOPENA, WTOpenA );
-//     // GETPROCADDRESS( WTINFOA, WTInfoA );
-//     // GETPROCADDRESS( WTGETA, WTGetA );
-//     // GETPROCADDRESS( WTSETA, WTSetA );
-//     // GETPROCADDRESS( WTPACKET, WTPacket );
-//     // GETPROCADDRESS( WTCLOSE, WTClose );
-//     // GETPROCADDRESS( WTENABLE, WTEnable );
-//     // GETPROCADDRESS( WTOVERLAP, WTOverlap );
-//     // GETPROCADDRESS( WTSAVE, WTSave );
-//     // GETPROCADDRESS( WTCONFIG, WTConfig );
-//     // GETPROCADDRESS( WTRESTORE, WTRestore );
-//     // GETPROCADDRESS( WTEXTSET, WTExtSet );
-//     // GETPROCADDRESS( WTEXTGET, WTExtGet );
-//     // GETPROCADDRESS( WTQUEUESIZESET, WTQueueSizeSet );
-//     // GETPROCADDRESS( WTDATAPEEK, WTDataPeek );
-//     // GETPROCADDRESS( WTPACKETSGET, WTPacketsGet );
-//     // GETPROCADDRESS( WTMGROPEN, WTMgrOpen );
-//     // GETPROCADDRESS( WTMGRCLOSE, WTMgrClose );
-//     // GETPROCADDRESS( WTMGRDEFCONTEXT, WTMgrDefContext );
-//     // GETPROCADDRESS( WTMGRDEFCONTEXTEX, WTMgrDefContextEx );
-
-//     static ref lib:libloading::Library = match libloading::Library::new("Wintab32.dll"){
-//         Ok(lib) => lib,
-//         Err(e) => panic!("Unable to load Wintab32.dll {}",e)
-//     };
-//     // signaure like this, can use types from wt
-//     // fn WTOpenA(arg1: HWND, arg2: LPLOGCONTEXTA, arg3: BOOL) -> HCTX
-//     static ref wtopena: libloading::Symbol<unsafe extern fn (arg1: HWND, arg2: wt::LPLOGCONTEXTA, arg3: wt::BOOL) -> wt::HCTX> = match lib.get(c"WTOpenA".to_bytes()){
-//         Ok(lib) => lib,
-//         Err(e) => panic!("Unable to load Wintab32.dll {}",e)
-//     };
-//     // pub fn WTInfoA(arg1: UINT, arg2: UINT, arg3: LPVOID) -> UINT;
-//     static ref wtinfoa: libloading::Symbol<unsafe extern fn (arg1: wt::UINT, arg2: wt::UINT, arg3: wt::LPVOID) -> wt::UINT> = match lib.get(c"WTInfoA".to_bytes()){
-//         Ok(lib) => lib,
-//         Err(e) => panic!("Unable to load Wintab32.dll {}",e)
-//     };
-//     // pub fn WTGetA(arg1: HCTX, arg2: LPLOGCONTEXTA) -> BOOL;
-//     // let wtgeta: libloading::Symbol<unsafe extern fn (arg1: wt::HCTX, arg2: wt::LPLOGCONTEXTA) -> wt::BOOL> = lib.get(c"WTGetA".to_bytes())?;
-//     //pub fn WTPacket(arg1: HCTX, arg2: UINT, arg3: LPVOID) -> BOOL;
-//     static ref wtpacket: libloading::Symbol<unsafe extern fn (arg1: wt::HCTX, arg2: wt::UINT, arg3: wt::LPVOID) -> wt::BOOL> = match lib.get(c"WTPacket".to_bytes()){
-//         Ok(lib) => lib,
-//         Err(e) => panic!("Unable to load Wintab32.dll {}",e)
-//     };
-// }
-
-
-static mut LIBRARY:Option<libloading::Library> = None;
+// GETPROCADDRESS( WTOPENA, WTOpenA );
+// GETPROCADDRESS( WTINFOA, WTInfoA );
+// GETPROCADDRESS( WTGETA, WTGetA );
+// GETPROCADDRESS( WTSETA, WTSetA );
+// GETPROCADDRESS( WTPACKET, WTPacket );
+// GETPROCADDRESS( WTCLOSE, WTClose );
+// GETPROCADDRESS( WTENABLE, WTEnable );
+// GETPROCADDRESS( WTOVERLAP, WTOverlap );
+// GETPROCADDRESS( WTSAVE, WTSave );
+// GETPROCADDRESS( WTCONFIG, WTConfig );
+// GETPROCADDRESS( WTRESTORE, WTRestore );
+// GETPROCADDRESS( WTEXTSET, WTExtSet );
+// GETPROCADDRESS( WTEXTGET, WTExtGet );
+// GETPROCADDRESS( WTQUEUESIZESET, WTQueueSizeSet );
+// GETPROCADDRESS( WTDATAPEEK, WTDataPeek );
+// GETPROCADDRESS( WTPACKETSGET, WTPacketsGet );
+// GETPROCADDRESS( WTMGROPEN, WTMgrOpen );
+// GETPROCADDRESS( WTMGRCLOSE, WTMgrClose );
+// GETPROCADDRESS( WTMGRDEFCONTEXT, WTMgrDefContext );
+// GETPROCADDRESS( WTMGRDEFCONTEXTEX, WTMgrDefContextEx );
 
 /// This function returns global information about the interface in an application-supplied buffer. Different types of
 /// information are specified by different index arguments. Applications use this function to receive information about
@@ -77,7 +46,7 @@ static mut LIBRARY:Option<libloading::Library> = None;
 /// 
 /// The return value specifies the size of the returned information in bytes. If the information is not supported, the
 /// function returns zero. If a tablet is not physically present, this function always returns zero.
-type WTINFOA = unsafe extern fn (wCategory: wt::UINT, nIndex: wt::UINT, lpOutput: wt::LPVOID) -> wt::UINT;
+type WTINFOA  = unsafe extern fn (wCategory: wt::UINT, nIndex: wt::UINT, lpOutput: wt::LPVOID) -> wt::UINT;
 
 /// This function establishes an active context on the tablet. On successful completion of this function, the
 /// application may begin receiving tablet events via messages (if they were requested), and may use the handle returned
@@ -88,7 +57,7 @@ type WTINFOA = unsafe extern fn (wCategory: wt::UINT, nIndex: wt::UINT, lpOutput
 /// - `fEnable` Specifies whether the new context will immediately begin processing input data.
 /// 
 /// The return value identifies the new context. It is NULL if the context is not opened.
-type WTOPENA = unsafe extern fn (hWnd: HWND, lpLogCtx: wt::LPLOGCONTEXTA, fEnable: wt::BOOL  ) -> wt::HCTX;
+type WTOPENA  = unsafe extern fn (hWnd: HWND, lpLogCtx: wt::LPLOGCONTEXTA, fEnable: wt::BOOL  ) -> wt::HCTX;
 
 /// This function fills in the passed lpPkt buffer with the context event packet having the specified serial number.
 /// The returned packet and any older packets are removed from the context's internal queue.
@@ -99,7 +68,7 @@ type WTOPENA = unsafe extern fn (hWnd: HWND, lpLogCtx: wt::LPLOGCONTEXTA, fEnabl
 /// 
 /// The return value is non-zero if the specified packet was found and returned. It is zero if the specified packet was
 /// not found in the queue.
-type WTPACKET = unsafe extern fn (hCtx: wt::HCTX, wSerial: wt::UINT, lpPkts: wt::LPVOID) -> wt::BOOL;
+type WTPACKET =     unsafe extern fn (hCtx: wt::HCTX, wSerial: wt::UINT, lpPkts: wt::LPVOID) -> wt::BOOL;
 
 static mut WINTAB_CONTEXT:Option<wt::HCTX> = None;
 
@@ -111,19 +80,14 @@ macro_rules! cast_void{
 }
 
 fn main() -> Result<()> {
-
-    
-
-    
     unsafe {
         let lib = match libloading::Library::new("Wintab32.dll"){
             Ok(lib) => lib,
             Err(e) => panic!("Unable to load Wintab32.dll {}",e)
         };
+
         let wtopena:libloading::Symbol<WTOPENA>  = lib.get(c"WTOpenA".to_bytes())?;
         let wtinfoa:libloading::Symbol<WTINFOA>  = lib.get(c"WTInfoA".to_bytes())?;
-        let wtpacket:libloading::Symbol<WTPACKET> = lib.get(c"WTPacket".to_bytes())?;
-
 
         let window_module_handle = GetModuleHandleA(None)?;
         debug_assert!(window_module_handle.0 != 0);
@@ -156,52 +120,23 @@ fn main() -> Result<()> {
             window_module_handle,
             None,
         );
-
-        
-        
-
-
-        // ORIGINAL CPP CODE
-        //if (!LoadWintab())
-        // {
-        //     ShowError("Wintab not available");
-        //     return FALSE;
-        // }
-
-        // /* check if WinTab available. */
-        // if (!gpWTInfoA(0, 0, NULL))
-        // {
-        //     ShowError("WinTab Services Not Available.");
-        //     return FALSE;
-        // }
-        // ... in loadWinTab
-        
-        
-        // let lib = libloading::Library::new("Wintab32.dll")?;
-        // // signaure like this, can use types from wt
-        // // fn WTOpenA(arg1: HWND, arg2: LPLOGCONTEXTA, arg3: BOOL) -> HCTX
-        // let wtopena: libloading::Symbol<unsafe extern fn (arg1: HWND, arg2: wt::LPLOGCONTEXTA, arg3: wt::BOOL) -> wt::HCTX> = lib.get(c"WTOpenA".to_bytes())?;
-        // // pub fn WTInfoA(arg1: UINT, arg2: UINT, arg3: LPVOID) -> UINT;
-        // let wtinfoa: libloading::Symbol<unsafe extern fn (arg1: wt::UINT, arg2: wt::UINT, arg3: wt::LPVOID) -> wt::UINT> = lib.get(c"WTInfoA".to_bytes())?;
-        // // pub fn WTGetA(arg1: HCTX, arg2: LPLOGCONTEXTA) -> BOOL;
-        // // let wtgeta: libloading::Symbol<unsafe extern fn (arg1: wt::HCTX, arg2: wt::LPLOGCONTEXTA) -> wt::BOOL> = lib.get(c"WTGetA".to_bytes())?;
-        // //pub fn WTPacket(arg1: HCTX, arg2: UINT, arg3: LPVOID) -> BOOL;
-        // let wtpacket: libloading::Symbol<unsafe extern fn (arg1: wt::HCTX, arg2: wt::UINT, arg3: wt::LPVOID) -> wt::BOOL> = lib.get(c"WTPacket".to_bytes())?;
         
         let mut log_context = wt::LOGCONTEXT::default();
 
         // let hctx:wt::HCTX = std::ptr::null_mut();
-        let wDevice:wt::UINT = 0;
-        let wExtX:wt::UINT = 0;
-        let wExtY:wt::UINT = 0;
-        let wWTInfoRetVal:wt::UINT = 0;
-        let mut TabletX:wt::AXIS = wt::AXIS{
+        let wDevice       : wt::UINT = 0;
+        let wExtX         : wt::UINT = 0;
+        let wExtY         : wt::UINT = 0;
+        let wWTInfoRetVal : wt::UINT = 0;
+        
+        let mut TabletX   : wt::AXIS = wt::AXIS{
             axMin:0,
             axMax:0,
             axUnits:0,
             axResolution:0,
         };
-        let mut TabletY:wt::AXIS = wt::AXIS{
+
+        let mut TabletY   : wt::AXIS = wt::AXIS{
             axMin: 0,
             axMax: 0,
             axUnits: 0,
@@ -277,12 +212,9 @@ fn main() -> Result<()> {
         // Leave the system origin and extents as received:
         // lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
 
-        // open the region
-        // The Wintab spec says we must open the context disabled if we are
-        // using cursor masks.
-        let hctx = wtopena(window_handel, &mut log_context as *mut _, 0);
-
-        WINTAB_CONTEXT = Some(hctx);
+        // open the tablet context
+        // The Wintab spec says we must open the context disabled if we are using cursor masks.
+        let _hctx = wtopena(window_handel, &mut log_context as *mut _, 0);
 
         let mut message = MSG::default();
         
@@ -290,9 +222,8 @@ fn main() -> Result<()> {
         while GetMessageA(&mut message, None, 0, 0).into() {
             DispatchMessageA(&message);
         }
-
-        Ok(())
     }
+    Ok(())
 }
 
 
@@ -359,10 +290,14 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
             WT_PACKET=>{
                 println!("GOT A WT_PACKET! Yay!");
                 let mut packet = wt::PACKET::default();
+
+                // Have load the dynamic library again because I can't seem persude rust make this a `mut static`
+                // variable. Sure, cool, great. Thanks for that rust. I sure hope this processes is cached or memoized
+                // internally somewhere.
                 let lib = libloading::Library::new("wintab32.dll").unwrap();
                 let wtpacket: libloading::Symbol<WTPACKET> = match lib.get(c"WTPacket".to_bytes()){
                     Ok(symbol) => symbol,
-                    Err(err) => panic!("Failed get wtpacket symbol :( {err}"),
+                    Err(err)   => panic!("Failed get wtpacket symbol :( {err}"),
                 };
 
                 let wtpacket_response =  wtpacket(lparam.0 as wt::HCTX, wparam.0 as u32, cast_void!(packet));
