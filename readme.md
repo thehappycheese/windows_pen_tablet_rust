@@ -30,9 +30,9 @@ input from my Huion Kamvas Pro 24 Pen Display:
      - `MSGPACK.H`
      - `PKTDEF.H`
      - `WINTAB.H`
-   - I don't know what the actual overall wintab licence is. I cant find source
+   - I don't know what the actual overall wintab license is. I cant find source
      code for the `wintab32.dll`? I suppose that makes it a proprietary thing?
-   - It doent seem like a great situation from an open source perspective, which
+   - It doen't seem like a great situation from an open source perspective, which
      is possibly why no rust crate has yet created a wrapper? (e.g. `octotablet`
      has explicitly marked wintab support as "not planned")
    - Therefore it is also not my goal to publish a wrapper at this time.
