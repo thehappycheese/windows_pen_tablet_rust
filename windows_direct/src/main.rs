@@ -87,12 +87,11 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
                 PostQuitMessage(0);
                 LRESULT(0)
             }
+            // commented out to reduce terminal noise
             // WM_MOUSEMOVE => {
             //     // Extract the mouse position from lparam
             //     let x_pos = GET_X_LPARAM!(lparam);
             //     let y_pos = GET_Y_LPARAM!(lparam);
-
-            //     // You can perform any action here. For demonstration, let's print the position.
             //     //println!("Mouse move at x: {}, y: {}", x_pos, y_pos);
 
             //     LRESULT(0)
@@ -105,32 +104,32 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
                         
                         match pointer_type{
                             PT_PEN =>{
+                                // never entered this match arm on my system :(
                                 let mut pen_info = POINTER_PEN_INFO::default();
                                 match GetPointerPenInfo(pointer_id, &mut pen_info){
                                     Ok(_)=>println!("Pen Info: {:?}", pen_info),
-                                    Err(_)=>println!("Pen Info Unavaliable")
+                                    Err(_)=>println!("Pen Info Unavailable")
                                 }
                             }
                             PT_MOUSE
                             | PT_POINTER
                             | PT_TOUCH
                             | PT_TOUCHPAD=>{
-                                //println!("Pointer Type: {:?}", pointer_type);
-                                // let mut pen_info = POINTER_PEN_INFO::default();
-                                // match GetPointerPenInfo(pointer_id, &mut pen_info){
-                                //     Ok(_)=>println!("Pen Pressure: {:?}", pen_info.pressure),
-                                //     Err(_)=>println!("Pen Info Unavaliable")
-                                // }
+                                // ok so it is definitely not a good idea to call GetPointerTouchInfo
+                                // if the event was PT_MOUSE... but i was not actually getting any other type of event.
+                                // Therefore i put the code here to get SOMETHING to show up in the terminal.
+                                // Anyway it doesn't crash, but the POINTER_TOUCH_INFO struct is probably not being
+                                // populated properly
                                 let mut touch_info = POINTER_TOUCH_INFO::default();
                                 match GetPointerTouchInfo(pointer_id, &mut touch_info){
                                     Ok(_)=>println!("Touch Info: {:?}", touch_info),
-                                    Err(_)=>println!("Touch Info Unavaliable")
+                                    Err(_)=>println!("Touch Info Unavailable")
                                 }
                             }
-                            _=> unreachable!("Unrecognised Pointer Type Added to Win32")
+                            _=> unreachable!("Unrecognized Pointer Type Added to Win32")
                         }
                     }
-                    Err(_)=>println!("Pointer Type Unavaliable")
+                    Err(_)=>println!("Pointer Type Unavailable")
                 };
                 DefWindowProcA(window, message, wparam, lparam)
             }
