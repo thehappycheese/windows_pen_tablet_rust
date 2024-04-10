@@ -3,7 +3,17 @@ use std::os::raw::{
     c_char
 };
 use super::c_type_aliases::*;
+use super::wtpkt::WTPKT;
+use super::coordinate::{
+    XY,
+    XYZ
+};
 
+
+/// The LOGCONTEXT data structure is used when opening and manipulating contexts. 
+/// This structure contains everything applications and tablet managers need to know about a context.
+/// To simplify context manipulations, applications may want to take advantage of the default context specification
+/// available via the [WTInfo](super::extern_function_types::WTINFOA) function.
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct LOGCONTEXT {
@@ -44,6 +54,8 @@ pub struct LOGCONTEXT {
     /// in this field, the item will be returned in relative mode. Bits in this field for items not selected in the
     /// lcPktData field will be ignored. Bits for data items that only allow one mode (such as the serial number) will
     /// also be ignored.
+    /// 
+    /// Note that when all bits are clear (0) then all fields are in absolute mode.
     pub lcPktMode: WTPKT,
 
     /// Specifies which packet data items can generate move events in the context. Bits for items that are not part of
@@ -66,70 +78,38 @@ pub struct LOGCONTEXT {
     /// receive the button release event, and then event processing will return to normal.
     pub lcBtnUpMask: DWORD,
 
-    /// The x-axis origin of the context's input area in the tablet's native coordinates.
+    /// The origin of the context's input area in the tablet's native coordinates.
     /// Will be clipped to the tablet native coordinate space when the context is opened or modified.
-    pub lcInOrgX: LONG,
-    /// The y-axis origin of the context's input area in the tablet's native coordinates.
-    /// Will be clipped to the tablet native coordinate space when the context is opened or modified.
-    pub lcInOrgY: LONG,
-    /// The z-axis origin of the context's input area in the tablet's native coordinates.
-    /// Will be clipped to the tablet native coordinate space when the context is opened or modified.
-    pub lcInOrgZ: LONG,
+    pub lcInOrgXYZ: XYZ<LONG>,
 
-    /// The x-axis extent of the context's input area in the tablet's native coordinates.
+    /// The extent of the context's input area in the tablet's native coordinates.
     /// Will be clipped to the tablet native coordinate space when the context is opened or modified.
-    pub lcInExtX: LONG,
-    /// The y-axis extent of the context's input area in the tablet's native coordinates.
-    /// Will be clipped to the tablet native coordinate space when the context is opened or modified.
-    pub lcInExtY: LONG,
-    /// The z-axis extent of the context's input area in the tablet's native coordinates.
-    /// Will be clipped to the tablet native coordinate space when the context is opened or modified.
-    pub lcInExtZ: LONG,
+    pub lcInExtXYZ: XYZ<LONG>,
 
-    /// The x-axis origin of the context's output area in context output coordinates.
+    /// The origin of the context's output area in context output coordinates.
     /// Used in coordinate scaling for absolute mode only.
-    pub lcOutOrgX: LONG,
-    /// The y-axis origin of the context's output area in context output coordinates.
-    /// Used in coordinate scaling for absolute mode only.
-    pub lcOutOrgY: LONG,
-    /// The z-axis origin of the context's output area in context output coordinates.
-    /// Used in coordinate scaling for absolute mode only.
-    pub lcOutOrgZ: LONG,
+    pub lcOutOrgXYZ: XYZ<LONG>,
 
-    /// The x-axis extent of the context's output area in context output coordinates.
-    /// Each is used in coordinate scaling for absolute mode only.
-    pub lcOutExtX: LONG,
-    /// The y-axis extent of the context's output area in context output coordinates.
-    /// Each is used in coordinate scaling for absolute mode only.
-    pub lcOutExtY: LONG,
-    /// The z-axis extent of the context's output area in context output coordinates.
-    /// Each is used in coordinate scaling for absolute mode only.
-    pub lcOutExtZ: LONG,
+    /// The extent of the context's output area in context output coordinates.
+    /// Used in coordinate scaling for absolute mode only.
+    pub lcOutExtXYZ: XYZ<LONG>,
 
-    /// The x-axis relative-mode sensitivity factor.
-    pub lcSensX: FIX32,
-    /// The y-axis relative-mode sensitivity factor.
-    pub lcSensY: FIX32,
-    /// The z-axis relative-mode sensitivity factor.
-    pub lcSensZ: FIX32,
+    /// The relative-mode sensitivity factor.
+    pub lcSensXYZ: XYZ<FIX32>,
 
     /// The system cursor tracking mode. Zero specifies absolute; non-zero means relative.
     pub lcSysMode: BOOL,
 
-    /// The x-axis origin of the screen mapping area for system cursor tracking, in screen coordinates.
-    pub lcSysOrgX: c_int,
-    /// The y-axis origin of the screen mapping area for system cursor tracking, in screen coordinates.
-    pub lcSysOrgY: c_int,
+    /// The origin of the screen mapping area for system cursor tracking, in screen coordinates.
+    pub lcSysOrgXY: XY<c_int>,
 
-    /// The x-axis extent of the screen mapping area for system cursor tracking, in screen coordinates.
-    pub lcSysExtX: c_int,
-    /// The y-axis extent of the screen mapping area for system cursor tracking, in screen coordinates.
-    pub lcSysExtY: c_int,
+    /// The extent of the screen mapping area for system cursor tracking, in screen coordinates.
+    pub lcSysExtXY: XY<c_int>,
+    
 
-    /// The x-axis system-cursor relative-mode sensitivity factor for the x and y axes, respectively.
-    pub lcSysSensX: FIX32,
-    /// The x-axis system-cursor relative-mode sensitivity factor for the x and y axes, respectively.
-    pub lcSysSensY: FIX32,
+    /// The system-cursor relative-mode sensitivity factor for the x and y axes, respectively.
+    pub lcSysSensXY: XY<FIX32>,
+    
 }
 impl Default for LOGCONTEXT{
     fn default() -> Self {
@@ -141,33 +121,29 @@ impl Default for LOGCONTEXT{
             lcMsgBase: 0,
             lcDevice: 0,
             lcPktRate: 0,
-            lcPktData: 0,
-            lcPktMode: 0,
-            lcMoveMask: 0,
+            lcPktData:  WTPKT::X | WTPKT::Y | WTPKT::BUTTONS | WTPKT::NORMAL_PRESSURE,
+            lcPktMode:  WTPKT::BUTTONS,
+            lcMoveMask: WTPKT::empty(),
             lcBtnDnMask: 0,
             lcBtnUpMask: 0,
-            lcInOrgX: 0,
-            lcInOrgY: 0,
-            lcInOrgZ: 0,
-            lcInExtX: 0,
-            lcInExtY: 0,
-            lcInExtZ: 0,
-            lcOutOrgX: 0,
-            lcOutOrgY: 0,
-            lcOutOrgZ: 0,
-            lcOutExtX: 0,
-            lcOutExtY: 0,
-            lcOutExtZ: 0,
-            lcSensX: 0,
-            lcSensY: 0,
-            lcSensZ: 0,
+            lcInOrgXYZ: XYZ(0,0,0),
+            
+            lcInExtXYZ: XYZ(0,0,0),
+            
+            lcOutOrgXYZ: XYZ(0,0,0),
+            
+            lcOutExtXYZ: XYZ(0,0,0),
+            
+            lcSensXYZ: XYZ(0,0,0),
+            
             lcSysMode: 0,
-            lcSysOrgX: 0,
-            lcSysOrgY: 0,
-            lcSysExtX: 0,
-            lcSysExtY: 0,
-            lcSysSensX: 0,
-            lcSysSensY: 0,
+            
+            lcSysOrgXY: XY(0, 0),
+            
+            lcSysExtXY: XY(0, 0),
+            
+            lcSysSensXY: XY(0, 0),
+            
         }
     }
 }

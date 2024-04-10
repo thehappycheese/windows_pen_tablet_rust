@@ -9,7 +9,16 @@ use std::os::raw::{
 pub type LONG = c_long;
 pub type DWORD = c_ulong;
 pub type FIX32 = DWORD;
-pub type WTPKT = DWORD;
 pub type UINT = c_uint;
 pub type LPVOID = *mut c_void;
 pub type BOOL = c_int;
+
+
+#[repr(C)]
+pub struct HWND(pub isize);
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct HCTX {
+    pub unused: ::std::os::raw::c_int,
+}

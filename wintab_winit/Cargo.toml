@@ -5,4 +5,6 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.81"
+bitflags = "2.5.0"
+libloading = "0.8.3"
 winit = "0.29.15"

@@ -13,10 +13,10 @@ Display:
 2. `winit_and_octotab` (Does not work)
    - attempts to use the [`octotablet`](https://github.com/Fuzzyzilla/octotablet) crate to access pen events, but in a
      much more abstracted and idiomatic way. `winit` provides a much easier mechanisim to create a window.
-   - `octotablet` only provides access via the
+   - `octotablet` currently only provides access via the
      [`RealTimeStylus` api](https://learn.microsoft.com/en-us/windows/win32/tablet/realtimestylus-reference)
      which is documented as "Legacy User Interaction Features - ... Windows 7
-     and Earlier".
+     and Earlier". However the author has indicated that they are [open to a PR](https://github.com/Fuzzyzilla/octotablet/issues/6#issuecomment-2046173357) to include wintab support.
 3. `wintab_test` (Works! Hooray?)
    - uses the wintab interface maintained by Wacom, using `bindgen` and `libloading`
    - `clang` must be installed and the `LIBCLANG_PATH` environment variable must
@@ -33,10 +33,6 @@ Display:
      - `WINTAB.H`
    - I don't know what the actual overall wintab license is. I cant find source
      code for the `wintab32.dll`? I suppose that makes it a proprietary thing?
-   - It doen't seem like a great situation from an open source perspective, which
-     is possibly why no rust crate has yet created a wrapper? (e.g. `octotablet`
-     has explicitly marked wintab support as "not planned")
-   - Therefore it is also not my goal to publish a wrapper at this time.
    - My code does not close the context properly, so beware potential issues. I
      had a LOT of trouble getting it to that point.
 

@@ -15,14 +15,7 @@ fn main() -> Result<()>{
     let event_loop = EventLoop::new()?;
     let window = WindowBuilder::new().build(&event_loop)?;
 
-    // // ControlFlow::Poll continuously runs the event loop, even if the OS hasn't
-    // // dispatched any events. This is ideal for games and similar applications.
     event_loop.set_control_flow(ControlFlow::Poll);
-
-    // ControlFlow::Wait pauses the event loop if no events are available to process.
-    // This is ideal for non-game applications that only update in response to user
-    // input, and uses significantly less power/CPU time than ControlFlow::Poll.
-    //event_loop.set_control_flow(ControlFlow::Wait);
     
     let window_holder = Arc::new(window); // This assumes your window or a wrapper thereof implements the necessary traits
     let mut manager = Builder::new().emulate_tool_from_mouse(false).build_shared(&window_holder)?;

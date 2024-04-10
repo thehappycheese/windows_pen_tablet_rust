@@ -1729,6 +1729,8 @@ name = "wintab_winit"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bitflags 2.5.0",
+ "libloading",
  "winit",
 ]
 
