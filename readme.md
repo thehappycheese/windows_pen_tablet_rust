@@ -1,7 +1,8 @@
 # Rust Pen Tablet / Pen Display Input Capture
 
-This workspace contains three binary crates with different attempts to capture
-input from my Huion Kamvas Pro 24 Pen Display:
+This workspace contains three binary crates (plus some extras, see further
+below) with different attempts to capture input from my Huion Kamvas Pro 24 Pen
+Display:
 
 1. `windows_direct` (Does not work)
    - attempts to read
@@ -52,3 +53,10 @@ I think this is due to a lack of interest from Microsoft, but I also cannot
 confirm that the issue is not with Huion's driver. Microsoft is my prime suspect
 because I have seen this issues reported by users of all different tablet
 manufacturers.
+
+
+## Extra Packages
+
+- `test_print_type_sizes` contains python notebooks and experiments used to
+  understand `struct` memory layout using the experimental compiler flag
+  `rustc -Z print-type-sizes`

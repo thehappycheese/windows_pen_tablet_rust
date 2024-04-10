@@ -1037,6 +1037,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "test_print_type_sizes"
+version = "0.1.0"
+
+[[package]]
 name = "thiserror"
 version = "1.0.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1718,6 +1722,14 @@ dependencies = [
  "lazy_static",
  "libloading",
  "windows",
+]
+
+[[package]]
+name = "wintab_winit"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "winit",
 ]
 
 [[package]]

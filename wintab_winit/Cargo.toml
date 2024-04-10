@@ -1,0 +1,8 @@
+[package]
+name = "wintab_winit"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.81"
+winit = "0.29.15"

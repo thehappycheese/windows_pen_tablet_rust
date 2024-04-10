@@ -70,8 +70,6 @@ type WTOPENA  = unsafe extern fn (hWnd: HWND, lpLogCtx: wt::LPLOGCONTEXTA, fEnab
 /// not found in the queue.
 type WTPACKET =     unsafe extern fn (hCtx: wt::HCTX, wSerial: wt::UINT, lpPkts: wt::LPVOID) -> wt::BOOL;
 
-static mut WINTAB_CONTEXT:Option<wt::HCTX> = None;
-
 
 macro_rules! cast_void{
     ($e:expr) => {
