@@ -1,6 +1,6 @@
 #![allow(warnings)]
 
-use std::os::raw::{
+use std::ffi::{
     c_ulong,
     c_uint,
     c_void,

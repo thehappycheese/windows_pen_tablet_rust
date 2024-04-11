@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 
 /// The first argument tp [extern fn wtinfoa()](super::extern_function_types::WTINFOA) which specifies
-/// the category of information being requested from the tablet service.
+/// the category of information being requested from wintab
 #[repr(u32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WTI {
@@ -12,7 +12,8 @@ pub enum WTI {
     STATUS = 2,
 
     /// Contains the current default digitizing logical context. See [CTX]
-    ///
+
+    /// 
     /// The digitizing context (WTI_DDCTXS or WTI_DEFCONTEXT) tells Wintab to deliver pen data packets containing tablet
     /// count data to the app when polled for or through a Wintab WT_PACKET message. With digitizing context data, the
     /// application has high-resolution streaming pen data that can be used, for example, in fine-grained control of
@@ -21,6 +22,12 @@ pub enum WTI {
     DEFCONTEXT = 3,
 
     /// Contains the current default system logical context. See [CTX]
+    /// 
+    /// I think "System Context" means that wintab will deliver packets with coordinate data already mapped to pixels on
+    /// our behalf, ie we don't get raw device coordinates. If we wanted the raw device coordinates (maybe our tablet
+    /// can deliver sub-pixel precision) then I think we can get that using the digitizing context;
+    /// see [WTI::DEFCONTEXT].
+    /// The documentation's explanation of the issue is pretty convoluted, so this is just my best guess.
     /// 
     /// The system context (WTI_DEFSYSCTX) tells Wintab to deliver pen data packets containing system pixel data (dpi
     /// adjusted) to the app when polled for or through a Wintab WT_PACKET message. With system data, it is very easy to
@@ -43,18 +50,22 @@ pub enum WTI {
     /// Current default system logical context for the corresponding device. See [CTX]
     DSCTXS = 500,
 
-    /// The function copies no data to the output buffer, but returns the size in bytes of the buffer necessary to hold the largest complete category
+    /// The function copies no data to the output buffer,
+    /// but returns the size in bytes of the buffer necessary to hold the largest complete category
     RETURN_BUFFER_SIZE_REQUIRED_ONLY = 0,
 }
 
 #[repr(u32)]
-/// Index definitions for [WTI::INTERFACE]
+/// Index definitions for [WTI::INTERFACE] queries
 pub enum IFC{
-    /// `TCHAR[]` Returns a copy of the null-terminated tablet hardware identification string in the user buffer. This string should include make, model, and revision information in user-readable format.
+    /// `TCHAR[]` Returns a copy of the null-terminated tablet hardware identification string in the user buffer.
+    /// This string should include make, model, and revision information in user-readable format.
     WINTABID    = 1,
-    /// `WORD` Returns the specification version number. The high-order byte contains the major version number; the low-order byte contains the minor version number.
+    /// `WORD` Returns the specification version number.
+    /// The high-order byte contains the major version number; the low-order byte contains the minor version number.
     SPECVERSION = 2,
-    /// `WORD` Returns the implementation version number. The high-order byte contains the major version number; the low-order byte contains the minor version number.
+    /// `WORD` Returns the implementation version number.
+    /// The high-order byte contains the major version number; the low-order byte contains the minor version number.
     IMPLVERSION = 3,
     /// `UINT` Returns the number of devices supported.
     NDEVICES    = 4,
@@ -71,6 +82,49 @@ pub enum IFC{
     /// `UINT` Returns the number of manager handles supported.
     NMANAGERS   = 10,
 }
+
+
+
+macro_rules! index_enum_and_struct{
+    ($docstring:literal, $struct_name:ident, $enum_name:ident, $enum_meta:meta, [$(($field_name:ident, $field_index:literal, $field_type:ty, $field_docstring:literal)),*])=>{
+        #[doc = $docstring]
+        #[repr(C)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        struct $struct_name {
+            $(
+                #[doc = $field_docstring]
+                pub $field_name: $field_type,
+            )*
+        }
+
+        #[doc = $docstring]
+        #[$enum_meta]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        enum $enum_name {
+            $(
+                #[doc = $field_docstring]
+                $field_name = $field_index,
+            )*
+        }
+    };
+}
+index_enum_and_struct!{
+    "[WTI::INTERFACE] queries",
+    TST_Struct,
+    TST_Enum,
+    repr(u32),
+    [
+        (YOMP, 1, u32, "yarp"),
+        (NONGK, 2, u32, "barp")
+    ]
+}
+
+fn test(){
+    TST_Enum::NONGK;
+}
+
+
+
 /// [WTI::STATUS] Index Definitions
 #[repr(u32)]
 pub enum STA{
@@ -321,3 +375,5 @@ pub enum EXT {
     /// TODO: UNDOCUMENTED?
     DEVICES    = 110,
 }
+
+

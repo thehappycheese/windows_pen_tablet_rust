@@ -1,6 +1,3 @@
-#[macro_use]
-mod wintab;
-
 use std::sync::Arc;
 
 use winit::{
@@ -11,12 +8,13 @@ use winit::{
 use libloading;
 use anyhow::Result;
 
-use wintab::{
+use wintab_wrapper::{
     HCTX,
     WTOPENA,
     WTINFOA,
     WTPACKET,
-    WTI
+    WTI,
+    cast_void
 };
 
 fn main() -> Result<()> {
@@ -36,7 +34,7 @@ fn main() -> Result<()> {
 
     // let ctx:HCTX = HCTX::default();
     // Get a default System context 
-    wtinfoa(WTI::DEFSYSCTX, 0, cast_void!(ctx) );
+    //wtinfoa(WTI::DEFSYSCTX, 0, cast_void!(ctx) );
     
 
 

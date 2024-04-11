@@ -1732,6 +1732,15 @@ dependencies = [
  "bitflags 2.5.0",
  "libloading",
  "winit",
+ "wintab_wrapper",
+]
+
+[[package]]
+name = "wintab_wrapper"
+version = "0.1.0"
+dependencies = [
+ "bitflags 2.5.0",
+ "libloading",
 ]
 
 [[package]]

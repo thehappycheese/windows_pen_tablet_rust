@@ -7,6 +7,10 @@ mod packet;
 mod extern_function_types;
 mod coordinate;
 mod information_categories;
+mod cstring_types;
+
+#[cfg(feature="use_libloading")]
+mod wrapper;
 
 pub use c_type_aliases::*;
 pub use coordinate::{XY, XYZ};
@@ -23,8 +27,9 @@ pub use information_categories::WTI;
 
 /// Casts a mutable reference to a void pointer (LPVOID).
 /// This basically destroys type information and invites bugs
+#[macro_export]
 macro_rules! cast_void{
     ($e:expr) => {
-        &mut $e as *mut _ as crate::wintab::LPVOID
+        &mut $e as *mut _ as $crate::LPVOID
     };
 }

@@ -1,4 +1,4 @@
-use std::os::raw::{
+use std::ffi::{
     c_ulong,
     c_uint,
     c_void,
@@ -20,5 +20,5 @@ pub struct HWND(pub isize);
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct HCTX {
-    pub unused: ::std::os::raw::c_int,
+    pub unused: ::std::ffi::c_int,
 }

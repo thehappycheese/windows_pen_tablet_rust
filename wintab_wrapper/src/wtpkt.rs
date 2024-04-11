@@ -1,5 +1,5 @@
 use bitflags::bitflags;
-use std::os::raw::c_ulong;
+use std::ffi::c_ulong;
 bitflags! {
     /// Bit field that specifies the various optional data items available in event packets.
     /// It is a 32-bit field. The event packet field flags can be combined using the bitwise OR operator.

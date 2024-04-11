@@ -3,6 +3,7 @@ members = [
     "test_print_type_sizes",
     "windows_direct",
     "winit_and_octotab",
+    "wintab_wrapper",
     "wintab_test",
     "wintab_winit"
 ]

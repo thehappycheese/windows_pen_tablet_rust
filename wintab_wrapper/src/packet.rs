@@ -4,7 +4,7 @@ use super::c_type_aliases::{
     UINT,
     LONG
 };
-use std::os::raw::c_int;
+use std::ffi::c_int;
 use super::coordinate::XY;
 use super::wtpkt::WTPKT;
 

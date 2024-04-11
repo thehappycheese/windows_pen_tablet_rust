@@ -1,6 +1,6 @@
-use std::os::raw::{
+use super::cstring_types::CString40;
+use std::ffi::{
     c_int,
-    c_char
 };
 use super::c_type_aliases::*;
 use super::wtpkt::WTPKT;
@@ -10,15 +10,16 @@ use super::coordinate::{
 };
 
 
+
 /// The LOGCONTEXT data structure is used when opening and manipulating contexts. 
 /// This structure contains everything applications and tablet managers need to know about a context.
 /// To simplify context manipulations, applications may want to take advantage of the default context specification
-/// available via the [WTInfo](super::extern_function_types::WTINFOA) function.
+/// available via the [WTInfoA](super::extern_function_types::WTINFOA) function.
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct LOGCONTEXT {
     ///Contains a zero-terminated context name string.
-    pub lcName: [c_char; 40usize],
+    pub lcName: CString40,
 
     ///	Specifies options for the context. These options can be combined by using the bitwise OR operator. The
     /// `lcOptions` field can be any combination of the values defined. Specifying options that are unsupported in a
@@ -72,10 +73,10 @@ pub struct LOGCONTEXT {
     /// The buttons for which button release events will be processed in the context. In the case of
     /// overlapping contexts, button release events for buttons that are not selected in this field may be processed by
     /// underlying contexts. If both press and release events are selected for a button
-    /// (see the `lcBtnDnMask` field above), then the interface will cause the context to implicitly capture all tablet
-    /// events while the button is down. In this case, events occurring outside the context will be clipped to the
-    /// context and processed as if they had occurred in the context. When the button is released, the context will
-    /// receive the button release event, and then event processing will return to normal.
+    /// (see the [LOGCONTEXT::lcBtnDnMask] field above), then the interface will cause the context to implicitly capture
+    /// all tablet events while the button is down. In this case, events occurring outside the context will be clipped 
+    /// to the context and processed as if they had occurred in the context. When the button is released, the context
+    /// will receive the button release event, and then event processing will return to normal.
     pub lcBtnUpMask: DWORD,
 
     /// The origin of the context's input area in the tablet's native coordinates.
@@ -114,7 +115,7 @@ pub struct LOGCONTEXT {
 impl Default for LOGCONTEXT{
     fn default() -> Self {
         Self{
-            lcName: [0; 40],
+            lcName: CString40::default(),
             lcOptions: 0,
             lcStatus: 0,
             lcLocks: 0,
@@ -127,23 +128,44 @@ impl Default for LOGCONTEXT{
             lcBtnDnMask: 0,
             lcBtnUpMask: 0,
             lcInOrgXYZ: XYZ(0,0,0),
-            
             lcInExtXYZ: XYZ(0,0,0),
-            
             lcOutOrgXYZ: XYZ(0,0,0),
-            
             lcOutExtXYZ: XYZ(0,0,0),
-            
             lcSensXYZ: XYZ(0,0,0),
-            
             lcSysMode: 0,
-            
             lcSysOrgXY: XY(0, 0),
-            
             lcSysExtXY: XY(0, 0),
-            
             lcSysSensXY: XY(0, 0),
-            
         }
+    }
+}
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{cast_void, WTINFOA, WTI};
+    use libloading::{Library, Symbol};
+    #[test]
+    fn test_struct_sizes(){
+        let size_required;
+        unsafe{
+            let wintab                  = Library::new("Wintab32.dll").unwrap();
+            let wtinfoa:Symbol<WTINFOA> = wintab.get(c"WTInfoA".to_bytes()).unwrap();
+            size_required               = wtinfoa(WTI::DEFSYSCTX, 0, std::ptr::null_mut());
+        }
+        let size_of_type = std::mem::size_of::<LOGCONTEXT>();
+        assert_eq!(size_required as usize, size_of_type);
+    }
+    #[test]
+    fn test_struct_content(){
+        let mut wintab_context = LOGCONTEXT::default();
+        unsafe{
+            let wintab                  = Library::new("Wintab32.dll").unwrap();
+            let wtinfoa:Symbol<WTINFOA> = wintab.get(c"WTInfoA".to_bytes()).unwrap();
+            let _ = wtinfoa(WTI::DEFSYSCTX, 0, cast_void!(wintab_context));
+        }
+        println!("{:#?}", wintab_context);
     }
 }
