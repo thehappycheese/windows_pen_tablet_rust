@@ -1,5 +1,5 @@
 [package]
-name = "sample_create_window"
+name = "test_windows_pointer_api"
 version = "0.0.0"
 edition = "2021"
 publish = false

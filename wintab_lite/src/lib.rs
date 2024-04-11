@@ -1,4 +1,13 @@
 
+//! 
+//! Example Usage
+//! ```
+//! use wintab_wrapper
+//! let lib = unsafe{Library::new("Wintab32.dll")?};
+//! let wtopena:Symbol<WTOPENA>  = unsafe{lib.get(c"WTOpenA".to_bytes())?};
+//! let wtinfoa:Symbol<WTINFOA>  = unsafe{lib.get(c"WTInfoA".to_bytes())?};
+//! ```
+//! 
 mod c_type_aliases;
 mod log_context;
 mod axis;

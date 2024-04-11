@@ -5,8 +5,8 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
-use libloading;
 use anyhow::Result;
+use libloading::{Library, Symbol};
 
 use wintab_wrapper::{
     HCTX,
@@ -25,9 +25,9 @@ fn main() -> Result<()> {
     
     let window_holder = Arc::new(window);
 
-    let lib = unsafe{libloading::Library::new("Wintab32.dll")?};
-    let wtopena:libloading::Symbol<WTOPENA>  = unsafe{lib.get(c"WTOpenA".to_bytes())?};
-    let wtinfoa:libloading::Symbol<WTINFOA>  = unsafe{lib.get(c"WTInfoA".to_bytes())?};
+    let lib = unsafe{Library::new("Wintab32.dll")?};
+    let wtopena:Symbol<WTOPENA>  = unsafe{lib.get(c"WTOpenA".to_bytes())?};
+    let wtinfoa:Symbol<WTINFOA>  = unsafe{lib.get(c"WTInfoA".to_bytes())?};
 
 
     

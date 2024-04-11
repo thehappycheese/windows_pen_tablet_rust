@@ -1,5 +1,5 @@
 [package]
-name = "winit_and_octotab"
+name = "test_winit_with_octotab"
 version = "0.1.0"
 edition = "2021"
 
