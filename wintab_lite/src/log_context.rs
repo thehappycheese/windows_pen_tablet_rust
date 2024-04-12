@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use super::cstring_types::CString40;
 use std::ffi::{
     c_int,
@@ -24,18 +25,18 @@ pub struct LOGCONTEXT {
     ///	Specifies options for the context. These options can be combined by using the bitwise OR operator. The
     /// `lcOptions` field can be any combination of the values defined. Specifying options that are unsupported in a
     /// particular implementation will cause `WTOpen` to fail.
-    pub lcOptions: UINT,
+    pub lcOptions: CXO,
 
     /// Specifies current status conditions for the context. These conditions can be combined by using the bitwise OR
     /// operator. The `lcStatus` field can be any combination of the values defined.
-    pub lcStatus: UINT,
+    pub lcStatus: CXS,
 
     /// Specifies which attributes of the context the application wishes to be locked. Lock conditions specify
     /// attributes of the context that cannot be changed once the context has been opened (calls to `WTConfig` will have
     /// no effect on the locked attributes). The lock conditions can be combined by using the bitwise OR operator. The
     /// `lcLocks` field can be any combination of the values defined. Locks can only be changed by the task or process
     /// that owns the context.
-    pub lcLocks: UINT,
+    pub lcLocks: CXL,
 
     /// The range of message numbers that will be used for reporting the activity of the context.
     pub lcMsgBase: UINT,
@@ -116,14 +117,14 @@ impl Default for LOGCONTEXT{
     fn default() -> Self {
         Self{
             lcName: CString40::default(),
-            lcOptions: 0,
-            lcStatus: 0,
-            lcLocks: 0,
+            lcOptions: CXO::empty(),
+            lcStatus: CXS::empty(),
+            lcLocks: CXL::empty(),
             lcMsgBase: 0,
             lcDevice: 0,
             lcPktRate: 0,
-            lcPktData:  WTPKT::X | WTPKT::Y | WTPKT::BUTTONS | WTPKT::NORMAL_PRESSURE,
-            lcPktMode:  WTPKT::BUTTONS,
+            lcPktData:  WTPKT::empty(),
+            lcPktMode:  WTPKT::empty(),
             lcMoveMask: WTPKT::empty(),
             lcBtnDnMask: 0,
             lcBtnUpMask: 0,
@@ -139,6 +140,66 @@ impl Default for LOGCONTEXT{
         }
     }
 }
+
+
+bitflags! {
+    /// See [LOGCONTEXT::lcOptions]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct CXO:UINT {
+        /// Specifies that the context is a system cursor context.
+        const      SYSTEM = 0b0000000000000001;
+        /// Specifies that the context is a Pen Windows context, if Pen Windows is installed.
+        /// The context is also a system cursor context; specifying CXO_PEN implies CXO_SYSTEM.
+        const         PEN = 0b0000000000000010;
+        /// Specifies that the context returns WT_PACKET messages to its owner.
+        const    MESSAGES = 0b0000000000000100;
+        /// Specifies that the input context on the tablet will have a margin. The margin is an area outside the
+        /// specified input area where events will be mapped to the edge of the input area.
+        /// This feature makes it easier to input points at the edge of the context.
+        const      MARGIN = 0b1000000000000000;
+        /// If the CXO_MARGIN bit is on, specifies that the margin will be inside the specified context.
+        /// Thus, scaling will occur from a context slightly smaller than the specified input context to the output
+        /// coordinate space.
+        const   MGNINSIDE = 0b0100000000000000;
+        /// Specifies that the context returns WT_CSRCHANGE messages to its owner.
+        const CSRMESSAGES = 0b0000000000001000;
+    }
+}
+
+bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct CXS:UINT {
+        /// Specifies that the context has been disabled using the WTEnable function.
+        const DISABLED = 0b001;
+        /// Specifies that the context is at least partially obscured by an overlapping context that is higher in the context overlap order.
+        const OBSCURED = 0b010;
+        /// Specifies that the context is the topmost context in the context overlap order.
+        const    ONTOP = 0b100;
+    }
+}
+
+bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct CXL:UINT {
+        /// Specifies that the context's input size cannot be changed. When this value is not specified,
+        /// the context's input extents in x, y, and z can be changed.
+        /// NOTE: The context's origins in x, y, and z can always be changed.
+        const      INSIZE = 0b00001;
+        /// Specifies that the context's input aspect ratio cannot be changed. When this value is specified, the
+        /// context's size can be changed, but the ratios among x, y, and z extents will be kept as close to constant
+        /// as possible.
+        const    INASPECT = 0b00010;
+        /// Specifies that the context's sensitivity settings for x, y, and z cannot be changed.
+        const SENSITIVITY = 0b00100;
+        /// Specifies that the context's margin options cannot be changed. This value controls the locking of the
+        /// CXO_MARGIN and CXO_MGNINSIDE option values.
+        const      MARGIN = 0b01000;
+        /// If the context is a system cursor context, the value specifies that the system pointing control variables
+        /// of the context cannot be changed.
+        const      SYSOUT = 0b10000;
+    }
+}
+
 
 
 
@@ -158,6 +219,8 @@ mod tests {
         let size_of_type = std::mem::size_of::<LOGCONTEXT>();
         assert_eq!(size_required as usize, size_of_type);
     }
+
+    /// Note: this is not a test, it just prints out the value obtained from the driver for review.
     #[test]
     fn test_struct_content(){
         let mut wintab_context = LOGCONTEXT::default();
@@ -166,6 +229,6 @@ mod tests {
             let wtinfoa:Symbol<WTINFOA> = wintab.get(c"WTInfoA".to_bytes()).unwrap();
             let _ = wtinfoa(WTI::DEFSYSCTX, 0, cast_void!(wintab_context));
         }
-        println!("{:#?}", wintab_context);
+        println!("sys {:#?}", wintab_context);
     }
 }

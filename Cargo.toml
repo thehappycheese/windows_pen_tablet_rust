@@ -3,8 +3,8 @@ members = [
     "test_windows_pointer_api",
     "test_winit_with_octotab",
     "test_wintab_with_bindgen",
-    
+
     "wintab_winit",
-    "wintab_lite",
+    "wintab_lite"
 ]
 resolver = "2"
