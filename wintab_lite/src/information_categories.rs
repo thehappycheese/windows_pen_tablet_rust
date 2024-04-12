@@ -1,4 +1,51 @@
 use bitflags::bitflags;
+use crate::{
+    CString40, AXIS, FIX32, UINT, WTPKT
+};
+
+/// This macro was a cool idea, but turns this approach doesn't work.
+/// For example, for WTI::DEVICE info queries it would be cool if we could do
+///
+/// ```no_run
+/// let mut result_struct:DVC_Struct = DVC_Struct::empty();
+/// unsafe{wtinfoa(WTI::DEVICES, 0, cast_void!(DVC_Struct)};
+/// ```
+/// but nooooooooo that would be too simple. Instead we have a field by field interface
+///
+/// ```no_run
+/// let some_result:MISCTYPES = ...;
+/// unsafe{wtinfoa(WTI::DEVICES, DVC::DVC_XMARGIN, cast_void!(some_result)};
+/// ```
+/// 
+/// And the worst part is that for string fields, the max-length is undocumented, so it is unclear how
+/// large the buffer should be to receive DVC::NAME
+/// 
+
+macro_rules! index_enum_and_struct{
+    ($docstring:literal, $struct_name:ident, $enum_name:ident, $enum_meta:meta, [$(($field_name:ident, $field_index:literal, $field_type:ty, $field_docstring:literal)),*])=>{
+        #[doc = $docstring]
+        #[repr(C)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[allow(non_snake_case)]
+        pub struct $struct_name {
+            $(
+                #[doc = $field_docstring]
+                pub $field_name: $field_type,
+            )*
+        }
+
+        #[doc = $docstring]
+        #[$enum_meta]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[allow(non_camel_case_types)]
+        pub enum $enum_name {
+            $(
+                #[doc = $field_docstring]
+                $field_name = $field_index,
+            )*
+        }
+    };
+}
 
 /// The first argument tp [extern fn wtinfoa()](super::extern_function_types::WTINFOA) which specifies
 /// the category of information being requested from wintab
@@ -83,47 +130,6 @@ pub enum IFC{
     /// `UINT` Returns the number of manager handles supported.
     NMANAGERS   = 10,
 }
-
-
-
-macro_rules! index_enum_and_struct{
-    ($docstring:literal, $struct_name:ident, $enum_name:ident, $enum_meta:meta, [$(($field_name:ident, $field_index:literal, $field_type:ty, $field_docstring:literal)),*])=>{
-        #[doc = $docstring]
-        #[repr(C)]
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        struct $struct_name {
-            $(
-                #[doc = $field_docstring]
-                pub $field_name: $field_type,
-            )*
-        }
-
-        #[doc = $docstring]
-        #[$enum_meta]
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        enum $enum_name {
-            $(
-                #[doc = $field_docstring]
-                $field_name = $field_index,
-            )*
-        }
-    };
-}
-index_enum_and_struct!{
-    "[WTI::INTERFACE] queries",
-    TST_Struct,
-    TST_Enum,
-    repr(u32),
-    [
-        (YOMP, 1, u32, "yarp"),
-        (NONGK, 2, u32, "barp")
-    ]
-}
-
-fn test(){
-    TST_Enum::NONGK;
-}
-
 
 
 /// [WTI::STATUS] Index Definitions
@@ -267,8 +273,39 @@ pub enum DVC{
 	PNPID       = 19,
 }
 
+// Sadly this did not work, see docs for index_enum_and_struct
+// index_enum_and_struct!{
+//     "[WTI::DEVICES] Queries",
+//     DVC_Struct,
+//     DVC_Enum,
+//     repr(u32),
+//     [
+//         (NAME        , 1,  CString40, "Returns a displayable null- terminated string describing the device, manufacturer, and revision level."),
+//         (HARDWARE    , 2,  HWC, "Returns flags indicating hardware and driver capabilities, as defined below:"),
+//         (NCSRTYPES   , 3,  UINT, "Returns the number of supported cursor types."),
+//         (FIRSTCSR    , 4,  UINT, "Returns the first cursor type number for the device."),
+//         (PKTRATE     , 5,  UINT, "Returns the maximum packet report rate in Hertz."),
+//         (PKTDATA     , 6,  WTPKT, "Returns a bit mask indicating which packet data items are always available."),
+//         (PKTMODE     , 7,  WTPKT, "Returns a bit mask indicating which packet data items are physically relative (i.e. items for which the hardware can only report change, not absolute measurement)."),
+//         (CSRDATA     , 8,  WTPKT, "Returns a bit mask indicating which packet data items are only available when certain cursors are connected. The individual cursor descriptions must be consulted to determine which cursors return which data."),
+//         (XMARGIN     , 9,  AXIS, "tablet context margins in tablet native coordinates"),
+//         (YMARGIN     , 10, AXIS, "tablet context margins in tablet native coordinates"),
+//         (ZMARGIN     , 11, AXIS, "tablet context margins in tablet native coordinates"),
+//         (X           , 12, AXIS, "tablet's range and resolution capabilities"),
+//         (Y           , 13, AXIS, "tablet's range and resolution capabilities"),
+//         (Z           , 14, AXIS, "tablet's range and resolution capabilities"),
+//         (NPRESSURE   , 15, AXIS, "tablet's range and resolution capabilities for the normal pressure"),
+//         (TPRESSURE   , 16, AXIS, "tablet's range and resolution capabilities for the tangential pressure"),
+//         (ORIENTATION , 17, (AXIS,AXIS,AXIS), "the tablet's orientation range and resolution capabilities"),
+//         (ROTATION    , 18, (AXIS,AXIS,AXIS), "the tablet's rotation range and resolution capabilities"),
+//         (PNPID       , 19, CString40, "Returns a null-terminated string containing the device’s Plug and Play ID.")
+//     ]
+// }
+
 bitflags! {
     /// See [WTI::DEVICES] and [DVC::HARDWARE] hardware and driver capabilities
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     pub struct HWC : u32 {
         /// Indicates that the display and digitizer share the same surface.
         const     INTEGRATED = 0b0001;

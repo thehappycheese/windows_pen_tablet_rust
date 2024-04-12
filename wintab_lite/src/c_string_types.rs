@@ -5,15 +5,16 @@ use std::{
 
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct CString40 {
     /// NOTE: the actual header definition says to use [c_char](std::ffi::c_char) which is signed [i8].
     /// This is super dumb. I think it is ok to not use [c_uchar] instead since we wont crash, our rust program
     /// will just interpret (correctly!) the signed integers as garbled nonsense unsigned ascii characters. 
-    /// The worst concievable outcome is that we set off the BELL character 40 times every time we print out a packet
+    /// The worst conceivable outcome is that we set off the BELL character 40 times every time we print out a packet
     /// instead 
     inner:[c_uchar; 40]
 }
+
 
 impl Default for CString40 {
     fn default() -> Self {
@@ -21,6 +22,7 @@ impl Default for CString40 {
     }
 }
 
+// TODO: This is a bad implementation. It should deref to `Cstr` instead
 impl Deref for CString40 {
     type Target=str;
     fn deref(&self) -> &Self::Target {
@@ -32,17 +34,41 @@ impl Deref for CString40 {
     }
 }
 
+
 impl std::fmt::Display for CString40 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.deref())
     }
 }
 
+
 impl std::fmt::Debug for CString40 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "c40\"{}\"", self.deref())
     }
 }
+
+
+impl CString40 {
+    /// A utility function to write a string into the internal buffer.
+    /// This function will truncate the string if it is longer than the CString40 buffer.
+    /// If the input string is less than the internal buffer length,
+    /// then the remainder of the inner buffer will be filled with null.
+    pub fn write_str(&mut self, new_value:&str) {
+        for (i, c) in self.inner.iter_mut().enumerate() {
+            *c = match new_value.chars().nth(i) {
+                Some(c) => match (c as i8).try_into() {
+                    Ok(c) => c,
+                    Err(_) => 32,
+                },
+                None => 0,
+            }
+        }
+        // set the last value to null to guarantee that this is always a valid CString 🙄
+        self.inner.last_mut().map(|c| *c = 0 );
+    }
+}
+
 
 #[cfg(test)]
 mod tests {

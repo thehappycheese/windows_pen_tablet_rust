@@ -1,5 +1,5 @@
 use bitflags::bitflags;
-use super::cstring_types::CString40;
+use crate::{Bitmask, CString40};
 use std::ffi::{
     c_int,
 };
@@ -69,7 +69,7 @@ pub struct LOGCONTEXT {
     /// The buttons for which button press events will be processed in the context. In the case of overlapping
     /// contexts, button press events for buttons that are not selected in this field may be processed by underlying
     /// contexts.
-    pub lcBtnDnMask: DWORD,
+    pub lcBtnDnMask: Bitmask<DWORD>,
 
     /// The buttons for which button release events will be processed in the context. In the case of
     /// overlapping contexts, button release events for buttons that are not selected in this field may be processed by
@@ -78,7 +78,7 @@ pub struct LOGCONTEXT {
     /// all tablet events while the button is down. In this case, events occurring outside the context will be clipped 
     /// to the context and processed as if they had occurred in the context. When the button is released, the context
     /// will receive the button release event, and then event processing will return to normal.
-    pub lcBtnUpMask: DWORD,
+    pub lcBtnUpMask: Bitmask<DWORD>,
 
     /// The origin of the context's input area in the tablet's native coordinates.
     /// Will be clipped to the tablet native coordinate space when the context is opened or modified.
@@ -126,17 +126,17 @@ impl Default for LOGCONTEXT{
             lcPktData:  WTPKT::empty(),
             lcPktMode:  WTPKT::empty(),
             lcMoveMask: WTPKT::empty(),
-            lcBtnDnMask: 0,
-            lcBtnUpMask: 0,
-            lcInOrgXYZ: XYZ(0,0,0),
-            lcInExtXYZ: XYZ(0,0,0),
-            lcOutOrgXYZ: XYZ(0,0,0),
-            lcOutExtXYZ: XYZ(0,0,0),
-            lcSensXYZ: XYZ(0,0,0),
+            lcBtnDnMask: Bitmask(0),
+            lcBtnUpMask: Bitmask(0),
+            lcInOrgXYZ: XYZ::default(),
+            lcInExtXYZ: XYZ::default(),
+            lcOutOrgXYZ: XYZ::default(),
+            lcOutExtXYZ: XYZ::default(),
+            lcSensXYZ: XYZ::default(),
             lcSysMode: 0,
-            lcSysOrgXY: XY(0, 0),
-            lcSysExtXY: XY(0, 0),
-            lcSysSensXY: XY(0, 0),
+            lcSysOrgXY: XY::default(),
+            lcSysExtXY: XY::default(),
+            lcSysSensXY: XY::default(),
         }
     }
 }

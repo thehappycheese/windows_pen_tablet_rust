@@ -25,7 +25,7 @@ pub type WTInfo  = unsafe extern fn (wCategory: WTI, nIndex: UINT, lpOutput: *mu
 /// - `fEnable` Specifies whether the new context will immediately begin processing input data.
 /// 
 /// The return value identifies the new context. It is NULL if the context is not opened.
-pub type WTOpen  = unsafe extern fn (hWnd: HWND, lpLogCtx: *mut LOGCONTEXT, fEnable: BOOL  ) -> HCTX;
+pub type WTOpen  = unsafe extern fn (hWnd: isize, lpLogCtx: *mut LOGCONTEXT, fEnable: BOOL  ) -> *mut HCTX;
 
 /// This function closes and destroys the tablet context object.
 /// After a call to this function, the passed handle is no longer valid. The owning window (and all manager windows)
@@ -78,3 +78,30 @@ pub type WTDataGet = unsafe extern fn (
     lpPkts: *mut c_void,
     lpNPkts: *mut c_int
 ) -> BOOL;
+
+
+// int WTPacketsGet(hCtx, cMaxPkts, lpPkts)
+
+/// This function copies the next cMaxPkts events from the packet queue of context
+/// hCtx to the passed lpPkts buffer and removes them from the queue.
+///
+/// - `hCtx` Identifies the context whose packets are being returned.
+/// - `cMaxPkts` Specifies the maximum number of packets to return.
+/// - `lpPkts` Points to a buffer to receive the event packets.
+///
+/// The return value is the number of packets copied in the buffer.
+///
+/// - The exact structure of the returned packet is determined by the packet
+///   information that was requested when the context was opened.
+/// - The buffer pointed to by lpPkts must be at least cMaxPkts * sizeof(PACKET)
+///   bytes long to prevent overflow.
+/// - Applications may flush packets from the queue by calling this function with a
+///   NULL lpPktargument.
+/// 
+
+pub type WTPacketsGet = unsafe extern fn (
+    hCtx: *mut HCTX,
+    cMaxPkts: c_int,
+    lpPkts: *mut c_void
+) -> c_int;
+

@@ -5,7 +5,7 @@ use super::c_type_aliases::{
 };
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct AXIS{
     pub axMin        : LONG,
     pub axMax        : LONG,

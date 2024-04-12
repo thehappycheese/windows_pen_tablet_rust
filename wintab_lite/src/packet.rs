@@ -13,7 +13,9 @@ use super::wtpkt::WTPKT;
 
 
 #[repr(u16)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ButtonChangeType {
+    #[default]
     NONE = 0,
     UP   = 1,
     DOWN = 2,
@@ -22,6 +24,7 @@ pub enum ButtonChangeType {
 
 // TODO: it is unknown if I have the order of these struct fields correct
 #[repr(C)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ButtonChange{
     /// Specifies which button changed.
     pub button_number: u16,
@@ -32,6 +35,7 @@ pub struct ButtonChange{
 /// Each cursor type will have a major axis and "normal orientation" defined for it, based on its physical
 /// characteristics.
 #[repr(C)]
+#[derive(Default,Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Rotation {
     /// Specifies the pitch of the cursor
 	pub roPitch : c_int,
@@ -44,6 +48,7 @@ pub struct Rotation {
 /// The ORIENTATION data structure specifies the Azimuth, Altitude and Twist Orientation of the cursor with respect to
 /// the tablet. Each cursor type will have rotation semantics defined for it, based on its physical characteristics.
 #[repr(C)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Orientation {
     /// Specifies the clockwise rotation of the cursor about the z axis through a full circular range.
     pub orAzimuth  : c_int,
@@ -56,7 +61,7 @@ pub struct Orientation {
 
 bitflags! {
     /// See [Packet::pkStatus]
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub struct TPS:UINT {
         /// Specifies that the cursor is out of the context.
         const PROXIMITY = 0b00001;
@@ -82,12 +87,13 @@ bitflags! {
 /// [`LOGCONTEXT`]:   crate::LOGCONTEXT
 /// [`.lcPktData`]:   crate::LOGCONTEXT::lcPktData
 /// [`WTPKT::all()`]: crate::WTPKT::all()
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[repr(C)]
 pub struct Packet {
     /// Specifies the context that generated the event.
     /// 
     /// TODO: Note this is a bit wierd... according to the original typedefs, this would end up being a pointer
-    pub pkContext:HCTX,
+    pub pkContext:*mut HCTX,
     
     /// Specifies various status and error conditions. These conditions can be combined by using the bitwise OR
     /// operator. The pkStatus field can be any combination of the status values.
@@ -131,6 +137,25 @@ pub struct Packet {
 
     /// Contains updated cursor rotation information. For details, see the description of the ROTATION data structure.
     pub pkRotation:Rotation,
+}
+impl Default for Packet {
+    fn default() -> Self {
+        Self{
+            pkContext:std::ptr::null_mut(), // TODO: <-- this is why Default is manually implemented. How to avoid?
+            pkStatus: Default::default(),
+            pkTime: Default::default(),
+            pkChanged: Default::default(),
+            pkSerialNumber: Default::default(),
+            pkCursor: Default::default(),
+            pkButtons: Default::default(),
+            pkXYZ: Default::default(),
+            pkTangentPressure: Default::default(),
+            pkNormalPressure: Default::default(),
+            pkOrientation: Default::default(),
+            pkRotation: Default::default(),
+            
+        }
+    }
 }
 
 #[cfg(test)]

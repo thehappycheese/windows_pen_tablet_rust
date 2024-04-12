@@ -19,12 +19,15 @@ mod packet;
 mod extern_function_types;
 mod coordinate;
 mod information_categories;
-mod cstring_types;
+mod c_string_types;
+mod bitmask;
 
 #[cfg(feature="use_libloading")]
 mod wrapper;
 
 pub use c_type_aliases::*;
+pub use c_string_types::CString40;
+pub use bitmask::Bitmask;
 pub use coordinate::{XY, XYZ};
 pub use axis::AXIS;
 pub use extern_function_types::{
@@ -33,7 +36,8 @@ pub use extern_function_types::{
     WTClose,
     WTPacket,
     WTQueuePacketsEx,
-    WTDataGet
+    WTDataGet,
+    WTPacketsGet
 };
 pub use log_context::LOGCONTEXT;
 pub use wtpkt::WTPKT;
@@ -42,24 +46,18 @@ pub use packet::{
     ButtonChange,
     ButtonChangeType
 };
-pub use information_categories::WTI;
+pub use information_categories::{
+    WTI,
+    DVC,
+};
 
 
-/// Casts a mutable reference to a void pointer (LPVOID).
-/// This basically destroys type information and invites bugs
+/// Takes a mutable reference and casts it to a void pointer: `type LPVOID = *mut std::ffi::c_void`.
+/// TODO: Ultimately it would be nice not to expose this as it destroys type information. It would be better to wrap the
+///       functions that need this.
 #[macro_export]
 macro_rules! cast_void{
     ($e:expr) => {
-        &mut $e as *mut _ as $crate::LPVOID
+        &mut $e as *mut _ as *mut std::ffi::c_void
     };
-}
-
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn doo(){
-        
-    }
 }
