@@ -18,7 +18,7 @@ fn main() -> Result<()> {
     
     unsafe {
         let window_handle_instance = GetModuleHandleA(None)?;
-        debug_assert!(window_handle_instance.0 != 0);
+        debug_assert!(!window_handle_instance.is_invalid());
 
         let window_class_name = s!("window");
 

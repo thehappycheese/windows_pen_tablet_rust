@@ -212,7 +212,8 @@ fn main() -> Result<()> {
 
         // open the tablet context
         // The Wintab spec says we must open the context disabled if we are using cursor masks.
-        let _hctx = wtopena(window_handel, &mut log_context as *mut _, 0);
+        let hctx = wtopena(window_handel, &mut log_context as *mut _, 0);
+        println!("HCTX on open is {:?}", hctx);
 
         let mut message = MSG::default();
         
@@ -300,7 +301,8 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
 
                 let wtpacket_response =  wtpacket(lparam.0 as wt::HCTX, wparam.0 as u32, cast_void!(packet));
                 assert!(wtpacket_response!=0);
-                println!("Got a packet! Whooo! {:?}", packet);
+                println!("HCTX recieved as lparam is {:?}", lparam.0);
+                println!("Got a packet! Whooo! {:#?}", packet);
 
                 DefWindowProcA(window, message, wparam, lparam)
             }

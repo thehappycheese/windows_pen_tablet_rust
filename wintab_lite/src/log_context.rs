@@ -206,14 +206,14 @@ bitflags! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{cast_void, WTINFOA, WTI};
+    use crate::{cast_void, WTInfo, WTI};
     use libloading::{Library, Symbol};
     #[test]
     fn test_struct_sizes(){
         let size_required;
         unsafe{
             let wintab                  = Library::new("Wintab32.dll").unwrap();
-            let wtinfoa:Symbol<WTINFOA> = wintab.get(c"WTInfoA".to_bytes()).unwrap();
+            let wtinfoa:Symbol<WTInfo> = wintab.get(c"WTInfoA".to_bytes()).unwrap();
             size_required               = wtinfoa(WTI::DEFSYSCTX, 0, std::ptr::null_mut());
         }
         let size_of_type = std::mem::size_of::<LOGCONTEXT>();
@@ -226,7 +226,7 @@ mod tests {
         let mut wintab_context = LOGCONTEXT::default();
         unsafe{
             let wintab                  = Library::new("Wintab32.dll").unwrap();
-            let wtinfoa:Symbol<WTINFOA> = wintab.get(c"WTInfoA".to_bytes()).unwrap();
+            let wtinfoa:Symbol<WTInfo> = wintab.get(c"WTInfoA".to_bytes()).unwrap();
             let _ = wtinfoa(WTI::DEFSYSCTX, 0, cast_void!(wintab_context));
         }
         println!("sys {:#?}", wintab_context);

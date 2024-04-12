@@ -28,9 +28,12 @@ pub use c_type_aliases::*;
 pub use coordinate::{XY, XYZ};
 pub use axis::AXIS;
 pub use extern_function_types::{
-    WTINFOA,
-    WTOPENA,
-    WTPACKET,
+    WTInfo,
+    WTOpen,
+    WTClose,
+    WTPacket,
+    WTQueuePacketsEx,
+    WTDataGet
 };
 pub use log_context::LOGCONTEXT;
 pub use wtpkt::WTPKT;

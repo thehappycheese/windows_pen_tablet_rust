@@ -85,6 +85,8 @@ bitflags! {
 #[repr(C)]
 pub struct Packet {
     /// Specifies the context that generated the event.
+    /// 
+    /// TODO: Note this is a bit wierd... according to the original typedefs, this would end up being a pointer
     pub pkContext:HCTX,
     
     /// Specifies various status and error conditions. These conditions can be combined by using the bitwise OR

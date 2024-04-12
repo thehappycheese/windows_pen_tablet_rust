@@ -48,6 +48,7 @@ impl Default for LOGCONTEXT{
 impl Default for PACKET{
     fn default() -> Self {
         Self{
+            pkContext: std::ptr::null_mut(),
             pkButtons: 0,
             pkX: 0,
             pkY: 0,

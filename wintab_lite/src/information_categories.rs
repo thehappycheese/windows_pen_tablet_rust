@@ -5,13 +5,13 @@ use bitflags::bitflags;
 #[repr(u32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WTI {
-    /// Contains global interface identification and capability information. See [IFC]
+    /// Specifies a query for global interface identification and capability information. See [IFC]
     INTERFACE = 1,
 
-    /// Contains current interface resource usage statistics. See [STA]
+    /// Specifies a query for current interface resource usage statistics. See [STA]
     STATUS = 2,
 
-    /// Contains the current default digitizing logical context. See [CTX]
+    /// Specifies a query for the current default digitizing logical context. See [CTX]
 
     /// 
     /// The digitizing context (WTI_DDCTXS or WTI_DEFCONTEXT) tells Wintab to deliver pen data packets containing tablet
@@ -21,7 +21,7 @@ pub enum WTI {
     /// interpolate the data into the app’s client rectangle.
     DEFCONTEXT = 3,
 
-    /// Contains the current default system logical context. See [CTX]
+    /// Specifies a query for the current default system logical context. See [CTX]
     /// 
     /// I think "System Context" means that wintab will deliver packets with coordinate data already mapped to pixels on
     /// our behalf, ie we don't get raw device coordinates. If we wanted the raw device coordinates (maybe our tablet
@@ -35,24 +35,25 @@ pub enum WTI {
     /// signature apps.
     DEFSYSCTX = 4,
 
-    /// Capability and status information for a device. See [DVC]
+    /// Specifies a query for the capability and status information for a device. See [DVC]
     DEVICES = 100,
 
-    /// Capability and status information for a cursor type. See [CSR]
+    /// Specifies a query for the capability and status information for a cursor type. See [CSR]
     CURSORS = 200,
 
-    /// Descriptive information and defaults for an extension. See [EXT]
+    /// Specifies a query for the descriptive information and defaults for an extension. See [EXT]
     EXTENSIONS = 300,
 
-    /// Current default digitizing logical context for the corresponding device. See [CTX]
+    /// Specifies a query for the current default digitizing logical context for the corresponding device. See [CTX]
     DDCTXS = 400,
 
-    /// Current default system logical context for the corresponding device. See [CTX]
+    /// Specifies a query for the current default system logical context for the corresponding device. See [CTX]
     DSCTXS = 500,
 
-    /// The function copies no data to the output buffer,
-    /// but returns the size in bytes of the buffer necessary to hold the largest complete category
-    RETURN_BUFFER_SIZE_REQUIRED_ONLY = 0,
+    //  Basically useless
+    // /// The function copies no data to the output buffer,
+    // /// but returns the size in bytes of the buffer necessary to hold the largest complete category
+    // RETURN_BUFFER_SIZE_REQUIRED_ONLY = 0,
 }
 
 #[repr(u32)]
