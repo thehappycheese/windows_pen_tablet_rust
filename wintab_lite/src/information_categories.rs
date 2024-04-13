@@ -3,49 +3,6 @@ use crate::{
     CString40, AXIS, FIX32, UINT, WTPKT
 };
 
-/// This macro was a cool idea, but turns this approach doesn't work.
-/// For example, for WTI::DEVICE info queries it would be cool if we could do
-///
-/// ```no_run
-/// let mut result_struct:DVC_Struct = DVC_Struct::empty();
-/// unsafe{wtinfoa(WTI::DEVICES, 0, cast_void!(DVC_Struct)};
-/// ```
-/// but nooooooooo that would be too simple. Instead we have a field by field interface
-///
-/// ```no_run
-/// let some_result:MISCTYPES = ...;
-/// unsafe{wtinfoa(WTI::DEVICES, DVC::DVC_XMARGIN, cast_void!(some_result)};
-/// ```
-/// 
-/// And the worst part is that for string fields, the max-length is undocumented, so it is unclear how
-/// large the buffer should be to receive DVC::NAME
-/// 
-
-macro_rules! index_enum_and_struct{
-    ($docstring:literal, $struct_name:ident, $enum_name:ident, $enum_meta:meta, [$(($field_name:ident, $field_index:literal, $field_type:ty, $field_docstring:literal)),*])=>{
-        #[doc = $docstring]
-        #[repr(C)]
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        #[allow(non_snake_case)]
-        pub struct $struct_name {
-            $(
-                #[doc = $field_docstring]
-                pub $field_name: $field_type,
-            )*
-        }
-
-        #[doc = $docstring]
-        #[$enum_meta]
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        #[allow(non_camel_case_types)]
-        pub enum $enum_name {
-            $(
-                #[doc = $field_docstring]
-                $field_name = $field_index,
-            )*
-        }
-    };
-}
 
 /// The first argument tp [extern fn wtinfoa()](super::extern_function_types::WTINFOA) which specifies
 /// the category of information being requested from wintab
