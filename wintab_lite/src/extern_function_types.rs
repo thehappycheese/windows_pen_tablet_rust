@@ -98,7 +98,6 @@ pub type WTDataGet = unsafe extern fn (
 /// - Applications may flush packets from the queue by calling this function with a
 ///   NULL lpPktargument.
 /// 
-
 pub type WTPacketsGet = unsafe extern fn (
     hCtx: *mut HCTX,
     cMaxPkts: c_int,

@@ -1,11 +1,12 @@
 use bitflags::bitflags;
-use std::ffi::c_ulong;
+use crate::DWORD;
+
 bitflags! {
     /// Bit field that specifies the various optional data items available in event packets.
     /// It is a 32-bit field. The event packet field flags can be combined using the bitwise OR operator.
     /// The WTPKT bit field can contain the values listed below, as well as any defined for extension data items.
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-    pub struct WTPKT: c_ulong {
+    pub struct WTPKT: DWORD {
         /// Specifies the handle of the reporting context
         const          CONTEXT = 0b00000000000001;
         /// Status information (Mainly, if the context been disabled i think)

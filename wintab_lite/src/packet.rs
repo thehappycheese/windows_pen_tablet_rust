@@ -1,17 +1,17 @@
 use bitflags::bitflags;
-use crate::XYZ;
-
-use super::c_type_aliases::{
-    DWORD,
-    HCTX,
-    UINT,
-    LONG
+use crate::{
+    WTPKT,
+    XYZ,
+    c_type_aliases::{
+        DWORD,
+        HCTX,
+        UINT,
+        LONG,
+        INT
+    }
 };
-use std::ffi::c_int;
-use super::coordinate::XY;
-use super::wtpkt::WTPKT;
 
-
+/// See [ButtonChange]
 #[repr(u16)]
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ButtonChangeType {
@@ -25,7 +25,7 @@ pub enum ButtonChangeType {
 // TODO: it is unknown if I have the order of these struct fields correct
 #[repr(C)]
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
-pub struct ButtonChange{
+pub struct ButtonChange {
     /// Specifies which button changed.
     pub button_number: u16,
     pub change_type: ButtonChangeType,
@@ -38,11 +38,11 @@ pub struct ButtonChange{
 #[derive(Default,Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Rotation {
     /// Specifies the pitch of the cursor
-	pub roPitch : c_int,
+	pub roPitch : INT,
     /// Specifies the roll of the cursor
-	pub roRoll  : c_int,
+	pub roRoll  : INT,
     /// Specifies the yaw of the cursor
-	pub roYaw   : c_int,
+	pub roYaw   : INT,
 }
 
 /// The ORIENTATION data structure specifies the Azimuth, Altitude and Twist Orientation of the cursor with respect to
@@ -51,12 +51,12 @@ pub struct Rotation {
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Orientation {
     /// Specifies the clockwise rotation of the cursor about the z axis through a full circular range.
-    pub orAzimuth  : c_int,
+    pub orAzimuth  : INT,
     /// Specifies the angle with the x-y plane through a signed, semicircular range. Positive values specify an angle
     /// upward toward the positive z axis; negative values specify an angle downward toward the negative z axis.
-    pub orAltitude : c_int,
+    pub orAltitude : INT,
     /// Specifies the clockwise rotation of the cursor about its own major axis.
-    pub orTwist    : c_int,
+    pub orTwist    : INT,
 }
 
 bitflags! {
@@ -78,21 +78,25 @@ bitflags! {
 }
 
 
-
 /// This is the full packet data structure,
-/// To receive packets with this struct the user MUST call [`WTOPENA`] with a
-/// [`LOGCONTEXT`] where the [`.lcPktData`] field has been set to [`WTPKT::all()`].
+/// for absolute mode packets except for buttons which is assumed to be in relative mode.
+/// To receive packets with this struct the user MUST call [`WTOpen`] with a
+/// [`LOGCONTEXT`] where 
 /// 
-/// [`WTOPENA`]:      crate::WTOPENA
-/// [`LOGCONTEXT`]:   crate::LOGCONTEXT
-/// [`.lcPktData`]:   crate::LOGCONTEXT::lcPktData
-/// [`WTPKT::all()`]: crate::WTPKT::all()
+/// - [`.lcPktData`] field has been set to [`WTPKT::all()`] (include all fields in struct) and
+/// - [`.lcPktMode`] has been set to [`WTPKT::BUTTONS`] (Only buttons in relative mode)
+/// 
+/// 
+/// [`WTOpen`]:        crate::WTOpen
+/// [`LOGCONTEXT`]:     crate::LOGCONTEXT
+/// [`.lcPktData`]:     crate::LOGCONTEXT::lcPktData
+/// [`.lcPktMode`]:     crate::LOGCONTEXT::lcPktMode
+/// [`WTPKT::all()`]:   crate::WTPKT::all()
+/// [`WTPKT::BUTTONS`]: crate::WTPKT::BUTTONS
 #[derive(Clone, Debug, PartialEq, Eq)]
-#[repr(C)]
+#[repr(C, packed(4))]
 pub struct Packet {
     /// Specifies the context that generated the event.
-    /// 
-    /// TODO: Note this is a bit wierd... according to the original typedefs, this would end up being a pointer
     pub pkContext:*mut HCTX,
     
     /// Specifies various status and error conditions. These conditions can be combined by using the bitwise OR
@@ -119,17 +123,20 @@ pub struct Packet {
     
     /// In absolute mode, each is a DWORD containing the scaled cursor location along the x, y, and z axes,
     /// respectively. In relative mode, each is a LONG containing the scaled change in cursor position.
+    /// 
+    /// In practice I seem to be getting signed long values even in absolute mode, possibly due to
+    /// incorrect configuration of the extents in [crate::LOGCONTEXT].
     pub pkXYZ:XYZ<LONG>,
-    
-    /// In absolute mode, each is a UINT containing the adjusted state of the normal and tangent pressures,
-    /// respectively. In relative mode, each is an int containing the change in adjusted pressure state.
-    // TODO: My be `int`, may be `UINT`
-
-    /// The adjusted state of the tangent pressure
-    pub pkTangentPressure:UINT,
 
     /// The adjusted state of the normal pressure
+    /// This is a UINT in absolute mode, and in relative mode it is an int containing the change in pressure state.
+    /// Only absolute mode is supported with this struct.
     pub pkNormalPressure:UINT,
+
+    /// The state of the tangent pressure
+    /// This is a UINT in absolute mode, and in relative mode it is an int containing the change in pressure state.
+    /// Only absolute mode is supported with this struct.
+    pub pkTangentPressure:UINT,
 
     /// Contains updated cursor orientation information. For details, see the description of the ORIENTATION data
     /// structure.
@@ -169,7 +176,7 @@ mod tests {
     use std::ptr::addr_of;
 
     #[test]
-    fn test_ButtonChange(){
+    fn test_button_change(){
         const UNINITIALIZED: MaybeUninit<ButtonChange> = MaybeUninit::uninit();
         let ptr = UNINITIALIZED.as_ptr();
         assert_eq!(

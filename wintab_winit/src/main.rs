@@ -116,6 +116,7 @@ fn main() -> Result<()> {
     // The example says we are supposed to open it in the disabled state... but why. I just open it in enabled state.
     let wintab_context_handel = unsafe{wtopena(hwnd.into(), &mut log_context, 1)};
     println!("Wintab context handel {:?}", wintab_context_handel);
+    println!("Log Context after open {log_context:#?}");
 
     let _ = event_loop.run(move |event, elwt| {
        
@@ -147,6 +148,14 @@ fn main() -> Result<()> {
                 match unsafe{wtqueue(wintab_context_handel, &mut from, &mut to)} {
                     0=>{},
                     _=>{
+
+                        // let mut packet = Packet::default();
+                        // let result = unsafe{wtpacket(wintab_context_handel, to, cast_void!(packet))};
+                        // if result!=0{
+                        //     println!("Size of one packet {result:?}");
+                        //     println!("{packet:#?}");
+                        // }
+
                         let mut count_packets_removed_from_queue = 0;
                         const MAX_PACKETS_TO_GET: i32 = 100;
                         let mut packets:[Packet; MAX_PACKETS_TO_GET as usize] = core::array::from_fn(|_|Packet::default());
@@ -160,8 +169,10 @@ fn main() -> Result<()> {
                         )};
 
                         //println!("Avaliable: {from}-{to} Found {total_actually_found} Removed {count_packets_removed_from_queue}");
-
-                        packets[0..count_packets_removed_from_queue as usize].iter().for_each(|packet|println!("{packet:#?}"));
+                        if count_packets_removed_from_queue>0{
+                            println!("============ {count_packets_removed_from_queue}");
+                            packets[0..count_packets_removed_from_queue as usize].iter().for_each(|packet|println!("{packet:#?}"));
+                        }
                     }
                 }
 

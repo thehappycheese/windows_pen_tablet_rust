@@ -1,8 +1,5 @@
 use bitflags::bitflags;
 use crate::{Bitmask, CString40};
-use std::ffi::{
-    c_int,
-};
 use super::c_type_aliases::*;
 use super::wtpkt::WTPKT;
 use super::coordinate::{
@@ -10,12 +7,13 @@ use super::coordinate::{
     XYZ
 };
 
-
-
 /// The LOGCONTEXT data structure is used when opening and manipulating contexts. 
 /// This structure contains everything applications and tablet managers need to know about a context.
 /// To simplify context manipulations, applications may want to take advantage of the default context specification
-/// available via the [WTInfoA](super::extern_function_types::WTINFOA) function.
+/// available via the [WTInfoA](crate::WTInfo) function.
+/// 
+/// The move mask and button masks together determine what kinds of events will be processed by the context.
+/// 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct LOGCONTEXT {
@@ -103,11 +101,10 @@ pub struct LOGCONTEXT {
     pub lcSysMode: BOOL,
 
     /// The origin of the screen mapping area for system cursor tracking, in screen coordinates.
-    pub lcSysOrgXY: XY<c_int>,
+    pub lcSysOrgXY: XY<INT>,
 
     /// The extent of the screen mapping area for system cursor tracking, in screen coordinates.
-    pub lcSysExtXY: XY<c_int>,
-    
+    pub lcSysExtXY: XY<INT>,
 
     /// The system-cursor relative-mode sensitivity factor for the x and y axes, respectively.
     pub lcSysSensXY: XY<FIX32>,

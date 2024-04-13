@@ -4,11 +4,17 @@
 //! ```
 //! use wintab_wrapper::{
 //!     WTOPENA,
-//!     WTINFOA
+//!     WTINFOA,
+//!     LOGCONTEXT,
+//!     PACKET
 //! }
-//! let lib = unsafe{Library::new("Wintab32.dll")?};
-//! let wtopena:Symbol<WTOPENA>  = unsafe{lib.get(c"WTOpenA".to_bytes())?};
-//! let wtinfoa:Symbol<WTINFOA>  = unsafe{lib.get(c"WTInfoA".to_bytes())?};
+//! use libloading::{Library, Symbol};
+//! 
+//! fn main(){
+//!     let lib = unsafe{Library::new("Wintab32.dll")?};
+//!     let wtopena:Symbol<WTOPENA>  = unsafe{lib.get(c"WTOpenA".to_bytes())?};
+//!     let wtinfoa:Symbol<WTINFOA>  = unsafe{lib.get(c"WTInfoA".to_bytes())?};
+//! }
 //! ```
 //! 
 mod c_type_aliases;
@@ -49,6 +55,13 @@ pub use packet::{
 pub use information_categories::{
     WTI,
     DVC,
+    CRC,
+    CTX,
+    CSR,
+    EXT,
+    HWC,
+    IFC,
+    STA,
 };
 
 

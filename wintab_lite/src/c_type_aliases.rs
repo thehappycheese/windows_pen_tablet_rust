@@ -1,21 +1,30 @@
 use std::ffi::{
     c_ulong,
     c_uint,
-    c_void,
     c_int,
     c_long,
 };
 
+/// = std::ffi::c_long ≈ i32
 pub type LONG = c_long;
+/// = std::ffi::c_long ≈ u32
 pub type DWORD = c_ulong;
 
+/// = std::ffi::u_int ≈ u32
 pub type UINT = c_uint;
+/// = std::ffi::c_int ≈ i32
+/// (Note the original wintab spec just uses `int` directly. I create this alias for consistency in this crate)
+pub type INT = c_int;
+
+/// = std::ffi::c_int ≈ i32
 pub type BOOL = c_int;
 
 
+/// This is not meant to be instantiated, we only ever use the pointer to this type
 #[repr(C)]
-pub struct HWND(pub isize);
+pub struct HWND(isize);
 
+/// This is not meant to be instantiated, we only ever use the pointer to this type
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct HCTX (std::ffi::c_int);
@@ -23,11 +32,16 @@ pub struct HCTX (std::ffi::c_int);
 
 /// A 32-bit fixed-point arithmetic type, with the radix point between the two words.
 /// Thus, the type contains 16 bits to the left of the radix point and 16 bits to the right of it.
+/// 
+/// This struct dereferences into an `f64` for actual usage,
+/// no methods for actual fixed point arithmetic are actually provided.
+/// 
+/// > Note: this type makes the assumption that a [DWORD] translates to a [u32] on your system.
 #[derive(Default, Clone, Copy, PartialEq, Eq)]
 pub struct FIX32(DWORD);
 
 impl FIX32 {
-    /// Creates a `Fix32` from a `c_ulong`.
+    /// Create a [FIX32] from a [DWORD]
     pub fn new(value: DWORD) -> Self {
         FIX32(value)
     }
@@ -54,9 +68,7 @@ impl std::fmt::Display for FIX32 {
     }
 }
 
-/// Converts from `f64` to `Fix32`.
-/// The conversion is done by multiplying the floating-point number by 2^16 (65536)
-/// to shift the decimal point 16 positions.
+/// TODO: untested
 impl From<f64> for FIX32 {
     fn from(value: f64) -> Self {
         let fixed_val = (value * 65536.0).round() as c_uint;
@@ -64,9 +76,7 @@ impl From<f64> for FIX32 {
     }
 }
 
-/// Converts from `Fix32` to `f64`.
-/// The conversion is done by dividing the fixed-point number by 2^16 (65536)
-/// to move the decimal point 16 positions back.
+/// TODO: untested
 impl Into<f64> for FIX32 {
     fn into(self) -> f64 {
         (self.0 as f64) / 65536.0

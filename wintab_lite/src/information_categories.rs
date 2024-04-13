@@ -1,11 +1,7 @@
 use bitflags::bitflags;
-use crate::{
-    CString40, AXIS, FIX32, UINT, WTPKT
-};
 
-
-/// The first argument tp [extern fn wtinfoa()](super::extern_function_types::WTINFOA) which specifies
-/// the category of information being requested from wintab
+/// The Information Category;
+/// used as the first argument when querying wintab through the [WTInfo()](super::WTInfo) function.
 #[repr(u32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WTI {
@@ -16,13 +12,12 @@ pub enum WTI {
     STATUS = 2,
 
     /// Specifies a query for the current default digitizing logical context. See [CTX]
-
     /// 
-    /// The digitizing context (WTI_DDCTXS or WTI_DEFCONTEXT) tells Wintab to deliver pen data packets containing tablet
-    /// count data to the app when polled for or through a Wintab WT_PACKET message. With digitizing context data, the
-    /// application has high-resolution streaming pen data that can be used, for example, in fine-grained control of
-    /// vectors in graphics apps or for biometric information in signature apps. For this context, the user must
-    /// interpolate the data into the app’s client rectangle.
+    /// > NOTE: The digitizing context ([WTI::DDCTXS] or [WTI::DEFCONTEXT]) tells Wintab to deliver pen data packets
+    /// > containing tablet count data to the app when polled for or through a Wintab WT_PACKET message. With digitizing 
+    /// > context data, the application has high-resolution streaming pen data that can be used, for example, in 
+    /// > fine-grained control of vectors in graphics apps or for biometric information in signature apps. For this
+    /// > context, the user must interpolate the data into the app’s client rectangle.
     DEFCONTEXT = 3,
 
     /// Specifies a query for the current default system logical context. See [CTX]
@@ -40,28 +35,33 @@ pub enum WTI {
     DEFSYSCTX = 4,
 
     /// Specifies a query for the capability and status information for a device. See [DVC]
+    /// 
+    /// "Multiplexed"; use `WTI::DEVICES + 1` to refer to the second item etc
     DEVICES = 100,
 
     /// Specifies a query for the capability and status information for a cursor type. See [CSR]
+    /// 
+    /// "Multiplexed"; use `WTI::CURSORS + 1` to refer to the second item etc
     CURSORS = 200,
 
     /// Specifies a query for the descriptive information and defaults for an extension. See [EXT]
+    /// 
+    /// "Multiplexed"; use `WTI::EXTENSIONS + 1` to refer to the second item etc
     EXTENSIONS = 300,
 
     /// Specifies a query for the current default digitizing logical context for the corresponding device. See [CTX]
+    /// 
+    /// "Multiplexed"; use `WTI::DDCTXS + 1` to refer to the second item etc
     DDCTXS = 400,
 
     /// Specifies a query for the current default system logical context for the corresponding device. See [CTX]
+    /// 
+    /// "Multiplexed"; use `WTI::DSCTXS + 1` to refer to the second item etc
     DSCTXS = 500,
-
-    //  Basically useless
-    // /// The function copies no data to the output buffer,
-    // /// but returns the size in bytes of the buffer necessary to hold the largest complete category
-    // RETURN_BUFFER_SIZE_REQUIRED_ONLY = 0,
 }
 
 #[repr(u32)]
-/// Index definitions for [WTI::INTERFACE] queries
+/// [WTI::INTERFACE] Index Definitions
 pub enum IFC{
     /// `TCHAR[]` Returns a copy of the null-terminated tablet hardware identification string in the user buffer.
     /// This string should include make, model, and revision information in user-readable format.
