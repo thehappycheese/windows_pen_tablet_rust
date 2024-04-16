@@ -45,7 +45,12 @@ pub use extern_function_types::{
     WTDataGet,
     WTPacketsGet
 };
-pub use log_context::LOGCONTEXT;
+pub use log_context::{
+    LOGCONTEXT,
+    CXO,
+    CXL,
+    CXS,
+};
 pub use wtpkt::WTPKT;
 pub use packet::{
     Packet,
@@ -66,8 +71,6 @@ pub use information_categories::{
 
 
 /// Takes a mutable reference and casts it to a void pointer: `type LPVOID = *mut std::ffi::c_void`.
-/// TODO: Ultimately it would be nice not to expose this as it destroys type information. It would be better to wrap the
-///       functions that need this.
 #[macro_export]
 macro_rules! cast_void{
     ($e:expr) => {

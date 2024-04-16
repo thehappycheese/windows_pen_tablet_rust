@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{default, fmt::Binary, ops::Deref};
 
 
 
@@ -7,6 +7,13 @@ use std::ops::Deref;
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Bitmask<T:std::fmt::Binary>(pub T);
+
+
+impl<T:Default+Binary> Default for Bitmask<T>{
+    fn default() -> Self {
+        Bitmask(T::default())
+    }
+}
 
 impl<T:std::fmt::Binary> std::fmt::Display for Bitmask<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

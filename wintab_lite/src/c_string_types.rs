@@ -22,14 +22,18 @@ impl Default for CString40 {
     }
 }
 
-// TODO: This is a bad implementation. It should deref to `Cstr` instead
+
 impl Deref for CString40 {
     type Target=str;
     fn deref(&self) -> &Self::Target {
         let end_index = self.inner.iter().position(|char|*char == 0).unwrap_or(0);
-        let slice = &self.inner[..end_index];
-        unsafe {
-            std::str::from_utf8_unchecked(slice)
+        if end_index == 0 {
+            return "";
+        }else{
+            let slice = &self.inner[..end_index];
+            unsafe {
+                std::str::from_utf8_unchecked(slice)
+            }
         }
     }
 }
@@ -87,7 +91,6 @@ mod tests {
         string_to_be_inserted.as_bytes().iter().enumerate().for_each(|(i, byte)|{
             buffer[i] = *byte;
         });
-
 
         let cstring = CString40{inner: buffer};
         // println!("cstring={cstring}");

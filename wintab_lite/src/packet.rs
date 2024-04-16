@@ -1,14 +1,8 @@
 use bitflags::bitflags;
 use crate::{
-    WTPKT,
-    XYZ,
     c_type_aliases::{
-        DWORD,
-        HCTX,
-        UINT,
-        LONG,
-        INT
-    }
+        DWORD, HCTX, INT, LONG, UINT
+    }, Bitmask, WTPKT, XYZ
 };
 
 /// See [ButtonChange]
@@ -117,9 +111,13 @@ pub struct Packet {
     /// Specifies which cursor type generated the packet.
     pub pkCursor: UINT,
 
-    /// In absolute mode, is a DWORD containing the current button state. In relative mode, is a DWORD whose low word
-    /// contains a button number, and whose high word contains one of the following codes
-    pub pkButtons: ButtonChange,
+    /// In "absolute" mode (i.e. `log_context.lcPktMode &= !WTPKT::BUTTONS;`),
+    /// is a bitmask containing the current button state. 
+    /// Note: When buttons are set to relative mode (`log_context.lcPktMode |= WTPKT::BUTTONS;`)
+    /// Then this field would be a ButtonChange Struct. However this just didn't work on my system.
+    /// Hence I have hard coded the "absolute" i.e. bitmask option.
+    //pub pkButtons: ButtonChange,
+    pub pkButtons: Bitmask<u32>,
     
     /// In absolute mode, each is a DWORD containing the scaled cursor location along the x, y, and z axes,
     /// respectively. In relative mode, each is a LONG containing the scaled change in cursor position.

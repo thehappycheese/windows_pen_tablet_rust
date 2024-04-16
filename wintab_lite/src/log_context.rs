@@ -106,7 +106,7 @@ pub struct LOGCONTEXT {
     /// The extent of the screen mapping area for system cursor tracking, in screen coordinates.
     pub lcSysExtXY: XY<INT>,
 
-    /// The system-cursor relative-mode sensitivity factor for the x and y axes, respectively.
+    /// The system-cursor relative-mode sensitivity factors.
     pub lcSysSensXY: XY<FIX32>,
     
 }
