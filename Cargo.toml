@@ -1,8 +1,8 @@
 [workspace]
 members = [
     "test_windows_pointer_api",
-    "test_winit_with_octotab",
-    "test_wintab_with_bindgen",
-    "wintab_lite"
+    "test_winit_with_octotablet",
+    "test_wintab_lite_with_libloading",
+    "test_wintab_with_bindgen"
 ]
 resolver = "2"

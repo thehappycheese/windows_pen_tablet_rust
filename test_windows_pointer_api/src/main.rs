@@ -2,17 +2,27 @@ use windows::{
     core::*,
     Win32::{
         Foundation::*,
-        Graphics::Gdi::ValidateRect,
+        Graphics::Gdi::{
+            BeginPaint, ClientToScreen, Ellipse, EndPaint, FillRect, GetStockObject, InvalidateRect, RedrawWindow, SelectObject, BLACK_PEN, HBRUSH, HRGN, PAINTSTRUCT, RDW_INTERNALPAINT, WHITE_BRUSH
+        },
         System::LibraryLoader::GetModuleHandleA,
         UI::{
-            Input::Pointer::{
-                EnableMouseInPointer, GetPointerPenInfo, GetPointerType, POINTER_INFO, POINTER_PEN_INFO, POINTER_TOUCH_INFO, GetPointerTouchInfo
+            Input::{
+                KeyboardAndMouse::{VIRTUAL_KEY, VK_SPACE}, Pointer::{
+                    EnableMouseInPointer, GetPointerPenInfo, GetPointerTouchInfo, GetPointerType, POINTER_INFO, POINTER_PEN_INFO, POINTER_TOUCH_INFO
+                }
             },
 
             WindowsAndMessaging::*
         }
     },
 };
+
+
+static mut X: i32 = 0;
+static mut Y: i32 = 0;
+static mut P:u32 = 0;
+static mut REDRAW: bool = false;
 
 fn main() -> Result<()> {
     
@@ -78,8 +88,37 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
     unsafe {
         match message {
             WM_PAINT => {
-                println!("WM_PAINT");
-                ValidateRect(window, None);
+                //assert!(ValidateRect(window, None).as_bool());
+                assert!(InvalidateRect(window, None, false).as_bool());
+
+                let mut client_rect: RECT = RECT::default();
+                GetClientRect(window, &mut client_rect).unwrap();
+                // Transform the tablet input into client window coordinates
+                let mut inner_position = POINT::default();
+                assert!(ClientToScreen(window, &mut inner_position).as_bool());
+
+                let tx = X - inner_position.x;
+                let ty = Y - inner_position.y;
+
+                println!("{client_rect:?} {inner_position:?} {X} {Y} {tx} {ty}");
+
+                // create a paint context objet thingo
+                let mut paint_struct: PAINTSTRUCT = PAINTSTRUCT::default();
+
+                // start painting
+                let hdc = BeginPaint(window, &mut paint_struct);
+
+                if REDRAW {
+                    println!("REDRAW was true");
+                    REDRAW = false;
+                    let brush = HBRUSH(GetStockObject(WHITE_BRUSH).0);
+                    FillRect(hdc, &client_rect, brush);
+                }
+                let size: i32 = ((P as f32 )/1024.0 * 8192.0 / 150.0) as i32;
+                SelectObject(hdc, GetStockObject(BLACK_PEN));
+                SelectObject(hdc, GetStockObject(WHITE_BRUSH));
+                assert!(Ellipse(hdc, tx - size, ty - size, tx + size, ty + size).as_bool());
+                assert!(EndPaint(window, &mut paint_struct).as_bool());
                 LRESULT(0)
             }
             WM_DESTROY => {
@@ -96,41 +135,12 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
 
             //     LRESULT(0)
             // },
-            WM_POINTERUPDATE => {
-                let pointer_id = wparam.0 as u32 & 0xFFFF;
-                let mut pointer_type = POINTER_INPUT_TYPE::default();
-                match GetPointerType(pointer_id, &mut pointer_type){
-                    Ok(_)=>{
-                        
-                        match pointer_type{
-                            PT_PEN =>{
-                                // never entered this match arm on my system :(
-                                let mut pen_info = POINTER_PEN_INFO::default();
-                                match GetPointerPenInfo(pointer_id, &mut pen_info){
-                                    Ok(_)=>println!("Pen Info: {:?}", pen_info),
-                                    Err(_)=>println!("Pen Info Unavailable")
-                                }
-                            }
-                            PT_MOUSE
-                            | PT_POINTER
-                            | PT_TOUCH
-                            | PT_TOUCHPAD=>{
-                                // ok so it is definitely not a good idea to call GetPointerTouchInfo
-                                // if the event was PT_MOUSE... but i was not actually getting any other type of event.
-                                // Therefore i put the code here to get SOMETHING to show up in the terminal.
-                                // Anyway it doesn't crash, but the POINTER_TOUCH_INFO struct is probably not being
-                                // populated properly
-                                let mut touch_info = POINTER_TOUCH_INFO::default();
-                                match GetPointerTouchInfo(pointer_id, &mut touch_info){
-                                    Ok(_)=>println!("Touch Info: {:?}", touch_info),
-                                    Err(_)=>println!("Touch Info Unavailable")
-                                }
-                            }
-                            _=> unreachable!("Unrecognized Pointer Type Added to Win32")
-                        }
-                    }
-                    Err(_)=>println!("Pointer Type Unavailable")
-                };
+            WM_KEYDOWN => {
+                let key = VIRTUAL_KEY(wparam.0 as u16);
+                if key == VK_SPACE {
+                    REDRAW = true;
+                    assert!(RedrawWindow(window, None, HRGN(0), RDW_INTERNALPAINT).as_bool());
+                }
                 DefWindowProcA(window, message, wparam, lparam)
             }
             WM_SETCURSOR
@@ -163,6 +173,51 @@ extern "system" fn wndproc(window: HWND, message: u32, wparam: WPARAM, lparam: L
             | WM_EXITSIZEMOVE
             | WM_NCPAINT
             | WM_ERASEBKGND => {
+                DefWindowProcA(window, message, wparam, lparam)
+            }
+            WM_POINTERUPDATE => {
+                let pointer_id = wparam.0 as u32 & 0xFFFF;
+                let mut pointer_type = POINTER_INPUT_TYPE::default();
+                match GetPointerType(pointer_id, &mut pointer_type){
+                    Ok(_)=>{
+                        
+                        match pointer_type{
+                            PT_PEN =>{
+                                let mut pen_info = POINTER_PEN_INFO::default();
+                                match GetPointerPenInfo(pointer_id, &mut pen_info){
+                                    Ok(_)=>{
+
+                                        let POINTER_PEN_INFO{
+                                            pressure,
+                                            pointerInfo: POINTER_INFO{
+                                                ptPixelLocation,
+                                                ..
+                                            },
+                                            ..
+                                        }=pen_info;
+                                        P = pressure;
+                                        X = ptPixelLocation.x;
+                                        Y = ptPixelLocation.y;
+                                        if P>0{
+                                            assert!(RedrawWindow(window, None, HRGN(0), RDW_INTERNALPAINT).as_bool());
+                                        }
+                                        //println!("Pen Info: {:?}", pen_info)
+
+                                    },
+                                    Err(_)=>{}//println!("Pen Info Unavailable")
+                                }
+                            }
+                            PT_MOUSE
+                            | PT_POINTER
+                            | PT_TOUCH
+                            | PT_TOUCHPAD=>{
+                                // ...
+                            }
+                            _=> unreachable!("Unrecognized Pointer Type Added to Win32")
+                        }
+                    }
+                    Err(_)=>println!("Pointer Type Unavailable")
+                };
                 DefWindowProcA(window, message, wparam, lparam)
             }
             WM_POINTERACTIVATE
